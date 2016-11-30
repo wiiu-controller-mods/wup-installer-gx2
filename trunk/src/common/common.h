@@ -5,27 +5,17 @@
 extern "C" {
 #endif
 
-#define LOADIINE_VERSION        "v0.3"
+#define WUP_GX2_VERSION			"v0.1"
 #define IS_USING_MII_MAKER      1
 
-/* Loadiine common paths */
+/* WUP common paths */
 #define CAFE_OS_SD_PATH         "/vol/external01"
 #define SD_PATH                 "sd:"
 #define WIIU_PATH                "/wiiu"
-#define GAMES_PATH               "/games"
-#define SAVES_PATH               "/saves"
-#define SD_GAMES_PATH            WIIU_PATH GAMES_PATH
-#define SD_SAVES_PATH            WIIU_PATH SAVES_PATH
-#define CONTENT_PATH            "/content"
-#define RPX_RPL_PATH            "/code"
-#define META_PATH               "/meta"
-
-/* file replacement */
-#define UPDATE_PATH             "/updates"
-#define COMMON_UPDATE_PATH      "<none>"
-#define FILELIST_NAME			"filelist.txt"
-#define DIR_IDENTIFY			"?"  /* maximum length = 1*/
-#define PARENT_DIR_IDENTIFY 	"?.."
+#define APP_PATH               	 "/apps"
+#define WUP_PATH               	 "/wup_installer_gx2"
+#define INSTALL_PATH             "/install"
+#define SD_INSTALL_PATH          SD_PATH INSTALL_PATH
 
 /* Macros for libs */
 #define LIB_CORE_INIT           0
@@ -82,17 +72,6 @@ extern "C" {
 #define LOADIINE_MODE           (*(volatile unsigned int*)(MEM_BASE + 0x1400 + 0x1C))      // loadiine operation mode (1 = smash bros, 0 = mii maker)
 
 #define OS_SPECIFICS            ((OsSpecifics*)(MEM_BASE + 0x1500))
-
-typedef struct _game_paths_t
-{
-    char os_game_path_base[511];
-    char os_save_path_base[511];
-    char game_dir[255];
-	char update_folder[255];
-    char save_dir_common[10];
-    char save_dir_user[10];
-    int extraSave;
-} game_paths_t;
 
 #ifdef __cplusplus
 }

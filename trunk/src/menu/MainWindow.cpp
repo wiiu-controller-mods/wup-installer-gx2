@@ -20,17 +20,22 @@
 #include "Application.h"
 #include "utils/StringTools.h"
 #include "utils/logger.h"
+#include "common/common.h"
 
 MainWindow::MainWindow(int w, int h)
     : width(w)
     , height(h)
     , bgImageColor(w, h, (GX2Color){ 0, 0, 0, 0 })
     , bgParticleImg(w, h, 500)
-    , browserWindow(w, h)
+	, splashImgData(Resources::GetImageData("splash.png"))
+	, splashImg(splashImgData)
+	, titleImgData(Resources::GetImageData("titleHeader.png"))
+    , titleImg(titleImgData)
+	, titleText("WUP Installer GX2")
+	, versionText(WUP_GX2_VERSION)
 {
-    append(&bgImageColor);
-    append(&bgParticleImg);
-
+	folderList = NULL;
+	
     for(int i = 0; i < 4; i++)
     {
         std::string filename = strfmt("player%i_point.png", i+1);
@@ -39,16 +44,12 @@ MainWindow::MainWindow(int w, int h)
         pointerImg[i]->setScale(1.5f);
         pointerValid[i] = false;
     }
-
-    append(&browserWindow);
+	
+	SetupMainView();
 }
 
 MainWindow::~MainWindow()
 {
-    remove(&browserWindow);
-    remove(&bgImageColor);
-    remove(&bgParticleImg);
-    
     while(!tvElements.empty())
     {
         delete tvElements[0];
@@ -64,6 +65,12 @@ MainWindow::~MainWindow()
         delete pointerImg[i];
         Resources::RemoveImageData(pointerImgData[i]);
     }
+	
+	Resources::RemoveImageData(splashImgData);
+    Resources::RemoveImageData(titleImgData);
+	
+	if(folderList != NULL)
+		delete folderList;
 }
 
 void MainWindow::updateEffects()
@@ -162,3 +169,77 @@ void MainWindow::drawTv(CVideo *video)
         }
     }
 }
+
+void MainWindow::SetupMainView()
+{
+    currentTvFrame = new GuiFrame(width, height);
+    currentTvFrame->setEffect(EFFECT_FADE, 10, 255);
+    currentTvFrame->setState(GuiElement::STATE_DISABLED);
+    currentTvFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+	currentTvFrame->append(&splashImg);
+    appendTv(currentTvFrame);
+	
+	SetDrcHeader();
+	SetBrowserWindow();
+	
+	currentDrcFrame = new GuiFrame(width, height);
+    currentDrcFrame->setEffect(EFFECT_FADE, 10, 255);
+    currentDrcFrame->setState(GuiElement::STATE_DISABLED);
+    currentDrcFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+    currentDrcFrame->append(&bgImageColor);
+    currentDrcFrame->append(&bgParticleImg);
+    currentDrcFrame->append(browserWindow);
+    currentDrcFrame->append(&headerFrame);
+    appendDrc(currentDrcFrame);
+}
+
+void MainWindow::SetDrcHeader()
+{
+	titleText.setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    titleText.setFontSize(46);
+    titleText.setPosition(0, 10);
+    titleText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
+	
+	versionText.setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    versionText.setFontSize(30);
+    versionText.setPosition(-15, -40);
+    versionText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
+	versionText.setAlignment(ALIGN_RIGHT | ALIGN_TOP);
+    
+	headerFrame.setSize(titleImg.getWidth(), titleImg.getHeight());
+	headerFrame.setPosition(0, 310);
+	headerFrame.append(&titleImg);
+	headerFrame.append(&titleText);
+	headerFrame.append(&versionText);
+}
+
+void MainWindow::SetBrowserWindow()
+{
+	folderList = new CFolderList();
+	
+	/*if(!folderList->GetCount())
+	{
+		ShowMessage("not installable content found");
+		delete folderList;
+		folderList = NULL;
+		return;
+	}*/
+	
+	browserWindow = new BrowserWindow(920, height, folderList);
+	browserWindow->setAlignment(ALIGN_LEFT | ALIGN_MIDDLE);
+	browserWindow->setPosition(50, 0);
+}
+
+void MainWindow::OnOpenEffectFinish(GuiElement *element)
+{
+    //! once the menu is open reset its state and allow it to be "clicked/hold"
+    element->effectFinished.disconnect(this);
+    element->clearState(GuiElement::STATE_DISABLED);
+}
+
+/*void MainWindow::OnCloseEffectFinish(GuiElement *element)
+{
+    //! remove element from draw list and push to delete queue
+    remove(element);
+    AsyncDeleter::pushForDelete(element);
+}*/

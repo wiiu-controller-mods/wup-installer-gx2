@@ -6,7 +6,6 @@
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/padscore_functions.h"
 #include "dynamic_libs/socket_functions.h"
-//#include "dynamic_libs/curl_functions.h"
 #include "dynamic_libs/ax_functions.h"
 #include "fs/fs_utils.h"
 #include "fs/sd_fat_devoptab.h"
@@ -15,9 +14,6 @@
 #include "utils/logger.h"
 #include "utils/utils.h"
 #include "common/common.h"
-//#include "main.h"
-
-#define WUP_GX2_VERSION		"v0.1"
 
 /* Entry point */
 extern "C" int Menu_Main(void)

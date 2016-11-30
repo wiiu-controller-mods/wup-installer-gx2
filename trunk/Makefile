@@ -147,6 +147,9 @@ clean:
 	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(CURDIR)/src/resources/filelist.h
 
 #---------------------------------------------------------------------------------
+run:
+	wiiload $(OUTPUT).elf
+#---------------------------------------------------------------------------------
 else
 
 DEPENDS	:=	$(OFILES:.o=.d)
