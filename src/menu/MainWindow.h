@@ -20,6 +20,7 @@
 #include <vector>
 #include <queue>
 #include "gui/Gui.h"
+#include "fs/CFolderList.hpp"
 #include "BrowserWindow.h"
 #include "gui/GuiParticleImage.h"
 #include "system/CMutex.h"
@@ -126,19 +127,45 @@ public:
         guiMutex.unlock();
     }
 	
+	/*enum
+	{
+		SELECT_MODE = 0;
+		INSTALL_MODE = 1;
+	}*/
+	
 private:
-    int width, height;
+    void SetupMainView(void);
+	void SetDrcHeader(void);
+	void SetBrowserWindow(void);
+	
+	void OnOpenEffectFinish(GuiElement *element);
+    
+	int width, height;
     std::vector<GuiElement *> drcElements;
     std::vector<GuiElement *> tvElements;
 
     GuiImage bgImageColor;
     GuiParticleImage bgParticleImg;
-    BrowserWindow browserWindow;
+	
+	GuiImageData *splashImgData;
+    GuiImage splashImg;
+	
+	GuiImageData *titleImgData;
+    GuiImage titleImg;
+	GuiText titleText;
+	GuiText versionText;
+    GuiFrame headerFrame;
+    
+    GuiFrame * currentTvFrame;
+    GuiFrame * currentDrcFrame;
 
     GuiImageData *pointerImgData[4];
     GuiImage *pointerImg[4];
     bool pointerValid[4];
-    
+	
+	CFolderList * folderList;
+    BrowserWindow * browserWindow;
+
     CMutex guiMutex;
 };
 

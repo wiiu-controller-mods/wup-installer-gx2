@@ -15,18 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "BrowserWindow.h"
-#include "utils/StringTools.h"
-#include "fs/DirList.h"
 
 #define MAX_FOLDERS_PER_PAGE 3
 
-BrowserWindow::BrowserWindow(int w, int h)
+BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     : GuiFrame(w, h)
 	, scrollbar(h - 150)
     , buttonClickSound(Resources::GetSound("button_click.wav"))
-    , titleImageData(Resources::GetImageData("titleHeader.png"))
-    , titleImage(titleImageData)
-	, buttonImageData(Resources::GetImageData("choiceUncheckedRectangle.png"))
+    , buttonImageData(Resources::GetImageData("choiceUncheckedRectangle.png"))
     , buttonCheckedImageData(Resources::GetImageData("choiceCheckedRectangle.png"))
     , buttonHighlightedImageData(Resources::GetImageData("choiceSelectedRectangle.png"))
     , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
@@ -34,105 +30,55 @@ BrowserWindow::BrowserWindow(int w, int h)
     , buttonATrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_A, true)
     , buttonUpTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_UP | GuiTrigger::STICK_L_UP, true)
     , buttonDownTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_DOWN | GuiTrigger::STICK_L_DOWN, true)
-    //, buttonLeftTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_LEFT | GuiTrigger::STICK_L_LEFT, true)
-    //, buttonRightTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_RIGHT | GuiTrigger::STICK_L_RIGHT, true)
     , DPADButtons(w,h)
-    , selectedButtonDPAD(-1)	
+    , AButton(w,h)
 {
+	folderList = list;
 	currentYOffset = 0;
 	
-    titleText.setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    titleText.setFontSize(46);
-    titleText.setPosition(0, 10);
-    titleText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
-    titleText.setText("WUP Installer GX2");
-    titleImage.setPosition(0, 310);
+    buttonCount = folderList->GetCount();
+	folderButtons.resize(buttonCount);
 	
-	DirList dir("sd:/install", NULL, DirList::Dirs);
-	
-	buttonCount = dir.GetFilecount();
-	if(buttonCount > 0)
-	{
-		folderButtons.resize(buttonCount);
+	for(int i = 0; i < buttonCount; i++)
+	{      
+		folderButtons[i].folderButtonImg = new GuiImage(buttonImageData);
+		folderButtons[i].folderButtonCheckedImg = new GuiImage(buttonCheckedImageData);
+		folderButtons[i].folderButtonHighlightedImg = new GuiImage(buttonHighlightedImageData);
+		folderButtons[i].folderButton = new GuiButton(folderButtons[i].folderButtonImg->getWidth(), folderButtons[i].folderButtonImg->getHeight());
+		folderButtons[i].folderButtonText = new GuiText(folderList->GetName(i).c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
 		
-		for(int i = 0; i < buttonCount; i++)
-		{      
-			folderButtons[i].folderButtonImg = new GuiImage(buttonImageData);
-			folderButtons[i].folderButtonCheckedImg = new GuiImage(buttonCheckedImageData);
-			folderButtons[i].folderButtonHighlightedImg = new GuiImage(buttonHighlightedImageData);
-			folderButtons[i].folderButton = new GuiButton(folderButtons[i].folderButtonImg->getWidth(), folderButtons[i].folderButtonImg->getHeight());
-			folderButtons[i].folderButtonText = new GuiText(dir.GetFilename(i), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
-			
-			folderButtons[i].folderButton->setImageSelectOver(folderButtons[i].folderButtonHighlightedImg);
-			folderButtons[i].folderButton->setLabel(folderButtons[i].folderButtonText);
-			folderButtons[i].folderButton->setSoundClick(buttonClickSound);
-			folderButtons[i].folderButton->setImage(folderButtons[i].folderButtonImg);
-			
-			folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * i);
-			folderButtons[i].folderButton->setEffectGrow();
-			folderButtons[i].folderButton->setTrigger(&touchTrigger);
-			//folderButtons[i].folderButton->setTrigger(&wpadTouchTrigger);
-			folderButtons[i].folderButton->clicked.connect(this, &BrowserWindow::OnFolderButtonClick);
-			browserFrame.append(folderButtons[i].folderButton);
-			
-			folderButtons[i].selected = false;
-			folderButtons[i].path = dir.GetFilepath(i);
-		}
-	}
-	else
-	{
-		dir.LoadPath("sd:/install", ".tik", DirList::Files);
+		folderButtons[i].folderButton->setImageSelectOver(folderButtons[i].folderButtonHighlightedImg);
+		folderButtons[i].folderButton->setLabel(folderButtons[i].folderButtonText);
+		folderButtons[i].folderButton->setSoundClick(buttonClickSound);
+		folderButtons[i].folderButton->setImage(folderButtons[i].folderButtonImg);
 		
-		buttonCount = dir.GetFilecount();
-		if(buttonCount > 0)
-		{
-			folderButtons.resize(1);
-			
-			folderButtons[0].folderButtonImg = new GuiImage(buttonImageData);
-			folderButtons[0].folderButtonCheckedImg = new GuiImage(buttonCheckedImageData);
-			folderButtons[0].folderButtonHighlightedImg = new GuiImage(buttonHighlightedImageData);
-			folderButtons[0].folderButton = new GuiButton(folderButtons[0].folderButtonImg->getWidth(), folderButtons[0].folderButtonImg->getHeight());
-			folderButtons[0].folderButtonText = new GuiText("install", 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
-			
-			folderButtons[0].folderButton->setImageSelectOver(folderButtons[0].folderButtonHighlightedImg);
-			folderButtons[0].folderButton->setLabel(folderButtons[0].folderButtonText);
-			folderButtons[0].folderButton->setSoundClick(buttonClickSound);
-			folderButtons[0].folderButton->setImage(folderButtons[0].folderButtonImg);
-			
-			folderButtons[0].folderButton->setPosition(0, 150);
-			folderButtons[0].folderButton->setEffectGrow();
-			folderButtons[0].folderButton->setTrigger(&touchTrigger);
-			//folderButtons[0].folderButton->setTrigger(&wpadTouchTrigger);
-			folderButtons[0].folderButton->clicked.connect(this, &BrowserWindow::OnFolderButtonClick);
-			browserFrame.append(folderButtons[0].folderButton);
-			
-			folderButtons[0].selected = false;
-			folderButtons[0].path = "sd:/install";
-		}
+		folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * i);
+		folderButtons[i].folderButton->setAlignment(ALIGN_LEFT | ALIGN_MIDDLE);
+        folderButtons[i].folderButton->setTrigger(&touchTrigger);
+		//folderButtons[i].folderButton->setTrigger(&wpadTouchTrigger);
+		folderButtons[i].folderButton->clicked.connect(this, &BrowserWindow::OnFolderButtonClick);
+		this->append(folderButtons[i].folderButton);
 	}
 	
 	if(buttonCount > MAX_FOLDERS_PER_PAGE)
     {
 		scrollbar.SetPageSize((buttonImageData->getHeight() + 30) * (buttonCount - MAX_FOLDERS_PER_PAGE));
         scrollbar.SetEntrieCount((buttonImageData->getHeight() + 30) * (buttonCount - MAX_FOLDERS_PER_PAGE));
-        scrollbar.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
-        scrollbar.setPosition(500, -30);
+        scrollbar.setAlignment(ALIGN_RIGHT | ALIGN_MIDDLE);
+        scrollbar.setPosition(0, -30);
         scrollbar.listChanged.connect(this, &BrowserWindow::OnScrollbarListChange);
-        browserFrame.append(&scrollbar);
+        this->append(&scrollbar);
     }
 	
-	//! append on top
-	append(&browserFrame);
-	browserFrame.append(&titleImage);
-    browserFrame.append(&titleText);
-	titleText.setParent(&titleImage);
-	
-    DPADButtons.setTrigger(&buttonATrigger);
-    DPADButtons.setTrigger(&buttonUpTrigger);
+	DPADButtons.setTrigger(&buttonUpTrigger);
     DPADButtons.setTrigger(&buttonDownTrigger);
     DPADButtons.clicked.connect(this, &BrowserWindow::OnDPADClick);
+	this->append(&DPADButtons);
     
-	browserFrame.append(&DPADButtons);
+	AButton.setTrigger(&buttonATrigger);
+    AButton.clicked.connect(this, &BrowserWindow::OnAButtonClick);
+	this->append(&AButton);
+	
 }
 
 BrowserWindow::~BrowserWindow()
@@ -146,68 +92,92 @@ BrowserWindow::~BrowserWindow()
         delete folderButtons[i].folderButtonText;
     }
    
-    Resources::RemoveImageData(titleImageData);
     Resources::RemoveImageData(buttonImageData);
     Resources::RemoveImageData(buttonCheckedImageData);
     Resources::RemoveSound(buttonClickSound);
 }
 
-void BrowserWindow::UpdateFolderButtons()
+void BrowserWindow::UpdateFolderButton(int ind)
 {
-	for(int i = 0; i < buttonCount; i++)
-    {
-		if(i == selectedButtonDPAD)
-			folderButtons[i].folderButton->setState(STATE_SELECTED);
-		else
-			folderButtons[i].folderButton->clearState(STATE_SELECTED);
-		
-        if(folderButtons[i].selected == true)   
-			folderButtons[i].folderButton->setImage(folderButtons[i].folderButtonCheckedImg);
+	//for(int i = 0; i < buttonCount; i++)
+    //{
+		if(folderList->IsSelected(ind))   
+			folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonCheckedImg);
         else
-			folderButtons[i].folderButton->setImage(folderButtons[i].folderButtonImg);
-    }
+			folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonImg);
+    //}
 }
 
 void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {	
+	int index = -1;
 	for(int i = 0; i < buttonCount; i++)
 	{
 		if(folderButtons[i].folderButton == button)
 		{
-			folderButtons[i].selected = !folderButtons[i].selected;
+			index = i;
 			
-			selectedButtonDPAD = i;
+			if(folderList->IsSelected(i))
+				folderList->UnSelect(i);
+			else
+				folderList->Select(i);
 		}
+		else
+			folderButtons[i].folderButton->clearState(STATE_SELECTED);
 	}
 	
-	UpdateFolderButtons();
+	UpdateFolderButton(index);
+}
+
+int BrowserWindow::FoundSelectedButton()
+{
+	int index = -1;
+	for(int i = 0; i < buttonCount && index < 0; i++)
+	{
+		if(folderButtons[i].folderButton->getState() == STATE_SELECTED)
+			index = i;
+	}
+	
+	return index;
+}
+
+void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
+{
+	int index = FoundSelectedButton();
+	
+	if(index < 0)
+		return;
+	
+	if(folderList->IsSelected(index))
+		folderList->UnSelect(index);
+	else
+		folderList->Select(index);
+	
+	UpdateFolderButton(index);
 }
 
 void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	if(trigger == &buttonATrigger)
+	int index = FoundSelectedButton();
+	
+	if(index < 0 && trigger == &buttonUpTrigger)
+		return;
+	
+	if(trigger == &buttonUpTrigger && index > 0)
 	{
-        if(selectedButtonDPAD >= 0 && selectedButtonDPAD < buttonCount)
-		{
-			int i = selectedButtonDPAD;
-			folderButtons[i].selected = !folderButtons[i].selected;
-		}
+		folderButtons[index].folderButton->clearState(STATE_SELECTED);
+		index--;
+		folderButtons[index].folderButton->setState(STATE_SELECTED);
 	}
-	else if(trigger == &buttonUpTrigger)
+	else if(trigger == &buttonDownTrigger && index < buttonCount-1)
 	{
-		selectedButtonDPAD--;
-		if(selectedButtonDPAD < 0)
-			selectedButtonDPAD = 0;
-	}
-	else if(trigger == &buttonDownTrigger)
-	{
-		selectedButtonDPAD++;
-		if(selectedButtonDPAD >= buttonCount)
-			selectedButtonDPAD = buttonCount - 1;
+		if(index >= 0)
+			folderButtons[index].folderButton->clearState(STATE_SELECTED);
+		index++;
+		folderButtons[index].folderButton->setState(STATE_SELECTED);
 	}
 	
-	UpdateFolderButtons();
-	scrollbar.SetSelectedItem((buttonImageData->getHeight() + 30) * selectedButtonDPAD);
+	scrollbar.SetSelectedItem((buttonImageData->getHeight() + 30) * index);
 }
 	
 void BrowserWindow::OnScrollbarListChange(int selectItem, int pageIndex)

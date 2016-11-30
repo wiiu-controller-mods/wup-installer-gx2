@@ -19,30 +19,27 @@
 
 #include "gui/Gui.h"
 #include "gui/Scrollbar.h"
+#include "fs/CFolderList.hpp"
 
 class BrowserWindow : public GuiFrame, public sigslot::has_slots<>
 {
 public:
-    BrowserWindow(int w, int h);
+    BrowserWindow(int w, int h, CFolderList * folderList);
     virtual ~BrowserWindow();
 	
 private:
     void OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
 	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
-	void UpdateFolderButtons();
+	void OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
+	void UpdateFolderButton(int ind);
+	int FoundSelectedButton();
 	
 	void OnScrollbarListChange(int selectItem, int pageIndex);
-	
-	GuiFrame browserFrame;
 	
 	Scrollbar scrollbar;
 	
     GuiSound *buttonClickSound;
     
-	GuiText titleText;
-    GuiImageData *titleImageData;
-    GuiImage titleImage;
-	
 	GuiImageData *buttonImageData;
     GuiImageData *buttonCheckedImageData;
     GuiImageData *buttonHighlightedImageData;
@@ -53,12 +50,10 @@ private:
     
     GuiTrigger buttonUpTrigger;
     GuiTrigger buttonDownTrigger;
-    //GuiTrigger buttonLeftTrigger;
-    //GuiTrigger buttonRightTrigger;
-
+    
     GuiButton DPADButtons;
+    GuiButton AButton;
 	
-	int selectedButtonDPAD;
 	int currentYOffset;
 	int buttonCount;
 	
@@ -69,11 +64,11 @@ private:
         GuiImage *folderButtonHighlightedImg;
         GuiButton *folderButton;
         GuiText *folderButtonText;
-		std::string path;
-		bool selected;
     } FolderButton;
 
     std::vector<FolderButton> folderButtons;
+	
+	CFolderList * folderList;
 };
 
 #endif //_BROSERWINDOW_H_
