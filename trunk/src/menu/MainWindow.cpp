@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "MainWindow.h"
-#include "dynamic_libs/os_functions.h"
-#include "dynamic_libs/socket_functions.h"
 #include "Application.h"
 #include "utils/StringTools.h"
 #include "utils/logger.h"
@@ -50,7 +48,12 @@ MainWindow::MainWindow(int w, int h)
 
 MainWindow::~MainWindow()
 {
-    while(!tvElements.empty())
+    remove(&bgImageColor);
+    remove(&bgParticleImg);
+    Resources::RemoveImageData(splashImgData);
+    Resources::RemoveImageData(titleImgData);
+	
+	while(!tvElements.empty())
     {
         delete tvElements[0];
         remove(tvElements[0]);
@@ -65,9 +68,6 @@ MainWindow::~MainWindow()
         delete pointerImg[i];
         Resources::RemoveImageData(pointerImgData[i]);
     }
-	
-	Resources::RemoveImageData(splashImgData);
-    Resources::RemoveImageData(titleImgData);
 	
 	if(folderList != NULL)
 		delete folderList;
@@ -103,16 +103,18 @@ void MainWindow::updateEffects()
 void MainWindow::update(GuiController *controller)
 {
     //! dont read behind the initial elements in case one was added
-    //u32 tvSize = tvElements.size();
-
+    
     if(controller->chan & GuiTrigger::CHANNEL_1)
     {
-        u32 drcSize = drcElements.size();
+        log_print("test 0\n");
+		u32 drcSize = drcElements.size();
 
         for(u32 i = 0; (i < drcSize) && (i < drcElements.size()); ++i)
         {
             drcElements[i]->update(controller);
         }
+		log_print("test 1\n");
+		
     }
     else
     {

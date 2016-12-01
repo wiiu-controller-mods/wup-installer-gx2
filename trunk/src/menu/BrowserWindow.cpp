@@ -99,13 +99,10 @@ BrowserWindow::~BrowserWindow()
 
 void BrowserWindow::UpdateFolderButton(int ind)
 {
-	//for(int i = 0; i < buttonCount; i++)
-    //{
-		if(folderList->IsSelected(ind))   
-			folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonCheckedImg);
-        else
-			folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonImg);
-    //}
+	if(folderList->IsSelected(ind))   
+		folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonCheckedImg);
+	else
+		folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonImg);
 }
 
 void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
@@ -129,7 +126,7 @@ void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *
 	UpdateFolderButton(index);
 }
 
-int BrowserWindow::FoundSelectedButton()
+int BrowserWindow::SearchSelectedButton()
 {
 	int index = -1;
 	for(int i = 0; i < buttonCount && index < 0; i++)
@@ -143,7 +140,7 @@ int BrowserWindow::FoundSelectedButton()
 
 void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	int index = FoundSelectedButton();
+	int index = SearchSelectedButton();
 	
 	if(index < 0)
 		return;
@@ -158,7 +155,7 @@ void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *contr
 
 void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	int index = FoundSelectedButton();
+	int index = SearchSelectedButton();
 	
 	if(index < 0 && trigger == &buttonUpTrigger)
 		return;

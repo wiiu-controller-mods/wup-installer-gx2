@@ -7,12 +7,9 @@
 #include "dynamic_libs/padscore_functions.h"
 #include "dynamic_libs/socket_functions.h"
 #include "dynamic_libs/ax_functions.h"
-#include "fs/fs_utils.h"
 #include "fs/sd_fat_devoptab.h"
-#include "system/exception_handler.h"
 #include "system/memory.h"
 #include "utils/logger.h"
-#include "utils/utils.h"
 #include "common/common.h"
 
 /* Entry point */
@@ -48,12 +45,6 @@ extern "C" int Menu_Main(void)
     //!*******************************************************************
     log_printf("Mount SD partition\n");
     mount_sd_fat("sd");
-
-    //!*******************************************************************
-    //!                    Setup exception handler                       *
-    //!*******************************************************************
-    log_printf("Setup exception handler\n");
-    setup_os_exceptions();
 
     //!*******************************************************************
     //!                    Enter main application                        *

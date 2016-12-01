@@ -32,7 +32,7 @@ private:
 	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
 	void OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
 	void UpdateFolderButton(int ind);
-	int FoundSelectedButton();
+	int SearchSelectedButton();
 	
 	void OnScrollbarListChange(int selectItem, int pageIndex);
 	
