@@ -23,7 +23,7 @@
 #include "fs/CFolderList.hpp"
 #include "BrowserWindow.h"
 #include "gui/GuiParticleImage.h"
-#include "system/CMutex.h"
+//#include "system/CMutex.h"
 
 class CVideo;
 

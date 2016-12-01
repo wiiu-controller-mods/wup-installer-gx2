@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "Application.h"
-#include "dynamic_libs/os_functions.h"
+//#include "dynamic_libs/os_functions.h"
 #include "gui/FreeTypeGX.h"
 #include "gui/GuiImageAsync.h"
 #include "gui/VPadController.h"
