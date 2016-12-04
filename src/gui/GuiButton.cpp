@@ -29,6 +29,7 @@ GuiButton::GuiButton(f32 w, f32 h)
 	imageOver = NULL;
 	imageHold = NULL;
 	imageClick = NULL;
+	imageChecked = NULL;
 	icon = NULL;
 	iconOver = NULL;
 	imageSelect = NULL;
@@ -54,6 +55,8 @@ GuiButton::GuiButton(f32 w, f32 h)
 	selectable = true;
 	holdable = false;
 	clickable = true;
+	
+	checked = false;
 }
 
 /**
@@ -81,6 +84,11 @@ void GuiButton::setImageHold(GuiImage* img)
 void GuiButton::setImageClick(GuiImage* img)
 {
 	imageClick = img;
+	if(img) img->setParent(this);
+}
+void GuiButton::setImageChecked(GuiImage* img)
+{
+	imageChecked = img;
 	if(img) img->setParent(this);
 }
 void GuiButton::setIcon(GuiImage* img)
@@ -137,6 +145,11 @@ void GuiButton::setSoundClick(GuiSound * snd)
 	soundClick = snd;
 }
 
+void GuiButton::check()
+{
+	checked = !checked;
+}
+
 void GuiButton::setTrigger(GuiTrigger * t, int idx)
 {
     if(idx >= 0 && idx < iMaxGuiTriggers)
@@ -174,6 +187,8 @@ void GuiButton::draw(CVideo *v)
 	// draw image
 	if(isStateSet(STATE_OVER | STATE_SELECTED | STATE_CLICKED | STATE_HELD) && imageOver)
 		imageOver->draw(v);
+	else if(imageChecked && checked)
+		imageChecked->draw(v);
 	else if(image)
 		image->draw(v);
 

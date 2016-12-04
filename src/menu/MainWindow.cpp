@@ -19,6 +19,7 @@
 #include "utils/StringTools.h"
 #include "utils/logger.h"
 #include "common/common.h"
+#include "common/svnrev.h"
 
 MainWindow::MainWindow(int w, int h)
     : width(w)
@@ -106,15 +107,12 @@ void MainWindow::update(GuiController *controller)
     
     if(controller->chan & GuiTrigger::CHANNEL_1)
     {
-        log_print("test 0\n");
-		u32 drcSize = drcElements.size();
-
+        u32 drcSize = drcElements.size();
+		
         for(u32 i = 0; (i < drcSize) && (i < drcElements.size()); ++i)
         {
             drcElements[i]->update(controller);
         }
-		log_print("test 1\n");
-		
     }
     else
     {
@@ -207,6 +205,7 @@ void MainWindow::SetDrcHeader()
     versionText.setPosition(-15, -40);
     versionText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
 	versionText.setAlignment(ALIGN_RIGHT | ALIGN_TOP);
+    versionText.setTextf("%s (rev %s)",  WUP_GX2_VERSION, GetRev());
     
 	headerFrame.setSize(titleImg.getWidth(), titleImg.getHeight());
 	headerFrame.setPosition(0, 310);

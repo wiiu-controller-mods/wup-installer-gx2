@@ -31,7 +31,6 @@ private:
     void OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
 	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
 	void OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
-	void UpdateFolderButton(int ind);
 	int SearchSelectedButton();
 	
 	void OnScrollbarListChange(int selectItem, int pageIndex);
@@ -45,7 +44,6 @@ private:
     GuiImageData *buttonHighlightedImageData;
 	
     GuiTrigger touchTrigger;
-    //GuiTrigger wpadTouchTrigger;
     GuiTrigger buttonATrigger;
     
     GuiTrigger buttonUpTrigger;

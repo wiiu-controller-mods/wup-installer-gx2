@@ -21,12 +21,11 @@
 BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     : GuiFrame(w, h)
 	, scrollbar(h - 150)
-    , buttonClickSound(Resources::GetSound("button_click.wav"))
+    , buttonClickSound(Resources::GetSound("button_click.mp3"))
     , buttonImageData(Resources::GetImageData("choiceUncheckedRectangle.png"))
     , buttonCheckedImageData(Resources::GetImageData("choiceCheckedRectangle.png"))
     , buttonHighlightedImageData(Resources::GetImageData("choiceSelectedRectangle.png"))
     , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
-    //, wpadTouchTrigger(GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5, GuiTrigger::BUTTON_A)
     , buttonATrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_A, true)
     , buttonUpTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_UP | GuiTrigger::STICK_L_UP, true)
     , buttonDownTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_DOWN | GuiTrigger::STICK_L_DOWN, true)
@@ -51,12 +50,13 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 		folderButtons[i].folderButton->setLabel(folderButtons[i].folderButtonText);
 		folderButtons[i].folderButton->setSoundClick(buttonClickSound);
 		folderButtons[i].folderButton->setImage(folderButtons[i].folderButtonImg);
+		folderButtons[i].folderButton->setImageChecked(folderButtons[i].folderButtonCheckedImg);
 		
 		folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * i);
 		folderButtons[i].folderButton->setAlignment(ALIGN_LEFT | ALIGN_MIDDLE);
         folderButtons[i].folderButton->setTrigger(&touchTrigger);
-		//folderButtons[i].folderButton->setTrigger(&wpadTouchTrigger);
 		folderButtons[i].folderButton->clicked.connect(this, &BrowserWindow::OnFolderButtonClick);
+		
 		this->append(folderButtons[i].folderButton);
 	}
 	
@@ -91,39 +91,29 @@ BrowserWindow::~BrowserWindow()
         delete folderButtons[i].folderButton;
         delete folderButtons[i].folderButtonText;
     }
+	
+	folderButtons.clear();
    
     Resources::RemoveImageData(buttonImageData);
     Resources::RemoveImageData(buttonCheckedImageData);
+    Resources::RemoveImageData(buttonHighlightedImageData);
     Resources::RemoveSound(buttonClickSound);
-}
-
-void BrowserWindow::UpdateFolderButton(int ind)
-{
-	if(folderList->IsSelected(ind))   
-		folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonCheckedImg);
-	else
-		folderButtons[ind].folderButton->setImage(folderButtons[ind].folderButtonImg);
 }
 
 void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {	
-	int index = -1;
+	button->check();
+	
 	for(int i = 0; i < buttonCount; i++)
 	{
 		if(folderButtons[i].folderButton == button)
 		{
-			index = i;
-			
-			if(folderList->IsSelected(i))
-				folderList->UnSelect(i);
-			else
-				folderList->Select(i);
+			folderList->Click(i);
+			folderButtons[i].folderButton->setState(STATE_SELECTED);
 		}
 		else
 			folderButtons[i].folderButton->clearState(STATE_SELECTED);
 	}
-	
-	UpdateFolderButton(index);
 }
 
 int BrowserWindow::SearchSelectedButton()
@@ -145,12 +135,8 @@ void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *contr
 	if(index < 0)
 		return;
 	
-	if(folderList->IsSelected(index))
-		folderList->UnSelect(index);
-	else
-		folderList->Select(index);
-	
-	UpdateFolderButton(index);
+	folderList->Click(index);
+	folderButtons[index].folderButton->check();
 }
 
 void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)

@@ -58,6 +58,7 @@ class GuiButton : public GuiElement
 		//!Sets the button's image on click
 		//!\param i Pointer to GuiImage object
 		void setImageClick(GuiImage* i);
+		void setImageChecked(GuiImage* i);
 		//!Sets the button's label
 		//!\param t Pointer to GuiText object
 		//!\param n Index of label to set (optional, default is 0)
@@ -94,7 +95,9 @@ class GuiButton : public GuiElement
 		//!Constantly called to allow the GuiButton to respond to updated input data
 		//!\param t Pointer to a GuiTrigger, containing the current input data from PAD/WPAD
 		void update(GuiController * c);
-
+		
+		void check(void);
+		
 		sigslot::signal2<GuiButton *, const GuiController *> selected;
 		sigslot::signal2<GuiButton *, const GuiController *> deSelected;
 		sigslot::signal2<GuiButton *, const GuiController *> pointedOn;
@@ -109,6 +112,7 @@ class GuiButton : public GuiElement
 		GuiImage * imageOver; //!< Button image for STATE_SELECTED
 		GuiImage * imageHold; //!< Button image for STATE_HELD
 		GuiImage * imageClick; //!< Button image for STATE_CLICKED
+		GuiImage * imageChecked; //!< Button image for STATE_CLICKED
 		GuiImage * icon;
 		GuiImage * iconOver;
 		GuiImage * imageSelect;
@@ -123,6 +127,8 @@ class GuiButton : public GuiElement
 		GuiTrigger * trigger[iMaxGuiTriggers]; //!< GuiTriggers (input actions) that this element responds to
 		GuiTrigger * clickedTrigger;
 		GuiTrigger * heldTrigger;
+		
+		bool checked;
 };
 
 #endif
