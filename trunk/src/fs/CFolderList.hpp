@@ -51,6 +51,8 @@ class CFolderList
 		void SelectAll();
 		void UnSelectAll();
 		
+		void Click(int ind);
+		
 	protected:
 		
 		typedef struct _FolderStruct

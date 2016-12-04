@@ -132,21 +132,21 @@ void Application::executeThread(void)
     log_printf("Video size %i x %i\n", video->getTvWidth(), video->getTvHeight());
 	
 	//! initialize splash
-	//mainStartUp = new MainStartUp(video);
+	mainStartUp = new MainStartUp(video);
 	
 	//! load resources
     Resources::LoadFiles("sd:/wiiu/apps/wup_installer_gx2/resources");
-	//mainStartUp->SetText(trNOOP("Loaded resources"));
+	mainStartUp->SetText("Loaded resources");
 	
     //! create bgMusic
-	//mainStartUp->SetText(trNOOP("Loading Music"));
+	mainStartUp->SetText("Loading Music");
     bgMusic = new GuiSound(Resources::GetFile("bgMusic.ogg"), Resources::GetFileSize("bgMusic.ogg"));
     bgMusic->SetLoop(true);
     bgMusic->Play();
     bgMusic->SetVolume(100);
 	
     log_printf("Initialize main window\n");
-	//mainStartUp->SetText(trNOOP("Initializing main"));
+	mainStartUp->SetText("Initializing main");
 	
     mainWindow = new MainWindow(video->getTvWidth(), video->getTvHeight());
 

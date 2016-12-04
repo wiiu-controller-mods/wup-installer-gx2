@@ -96,6 +96,14 @@ void CFolderList::UnSelectAll()
 		Folders.at(i)->selected = false;
 }
 
+void CFolderList::Click(int ind)
+{
+	if(ind < 0 || ind >= (int) Folders.size())
+		return;
+
+	Folders.at(ind)->selected = !Folders.at(ind)->selected;
+}
+
 void CFolderList::Reset()
 {
 	//for(u32 i = 0; i < Folders.size(); i++)

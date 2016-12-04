@@ -93,6 +93,7 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 # automatically build a list of object files for our project
 #---------------------------------------------------------------------------------
 FILELIST		:=	$(shell bash ./filelist.sh)
+SVNREV			:=	$(shell bash ./svnrev.sh)
 export CFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 export CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 export HFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.h)))
@@ -102,7 +103,7 @@ BINFILES		:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 TTFFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ttf)))
 PNGFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
 OGGFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ogg)))
-WAVFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.wav)))
+MP3FILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.mp3)))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -116,7 +117,7 @@ endif
 export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 					$(sFILES:.s=.o) $(SFILES:.S=.o) \
 					$(PNGFILES:.png=.png.o) $(OGGFILES:.ogg=.ogg.o) \
-					$(WAVFILES:.wav=.wav.o) $(TTFFILES:.ttf=.ttf.o) \
+					$(MP3FILES:.mp3=.mp3.o) $(TTFFILES:.ttf=.ttf.o) \
 					$(addsuffix .o,$(BINFILES))
 
 #---------------------------------------------------------------------------------
@@ -144,7 +145,8 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(CURDIR)/src/resources/filelist.h
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(CURDIR)/src/common/svnrev.c \
+			$(CURDIR)/meta/meta.xml $(CURDIR)/src/resources/filelist.h
 
 #---------------------------------------------------------------------------------
 run:

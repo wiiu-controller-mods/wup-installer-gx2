@@ -26,7 +26,7 @@
 
 Scrollbar::Scrollbar(int h)
     : touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
-    //, wpadTouchTrigger(GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5, GuiTrigger::BUTTON_A)
+    , wpadTouchTrigger(GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5, GuiTrigger::BUTTON_A)
 {
 	SelItem = 0;
 	SelInd = 0;
@@ -64,7 +64,7 @@ Scrollbar::Scrollbar(int h)
 	arrowUpBtn->setAlignment(ALIGN_CENTER | ALIGN_TOP);
 	arrowUpBtn->setPosition(0, 0);
 	arrowUpBtn->setTrigger(&touchTrigger, 0);
-	//arrowUpBtn->setTrigger(&wpadTouchTrigger, 1);
+	arrowUpBtn->setTrigger(&wpadTouchTrigger, 1);
 	arrowUpBtn->setSoundClick(btnSoundClick);
 	arrowUpBtn->setEffectGrow();
 	arrowUpBtn->clicked.connect(this, &Scrollbar::OnUpButtonClick);
@@ -75,7 +75,7 @@ Scrollbar::Scrollbar(int h)
 	arrowDownBtn->setAlignment(ALIGN_CENTER | ALIGN_BOTTOM);
 	arrowDownBtn->setPosition(0, 0);
 	arrowDownBtn->setTrigger(&touchTrigger, 0);
-	//arrowDownBtn->setTrigger(&wpadTouchTrigger, 1);
+	arrowDownBtn->setTrigger(&wpadTouchTrigger, 1);
 	arrowDownBtn->setSoundClick(btnSoundClick);
 	arrowDownBtn->setEffectGrow();
 	arrowDownBtn->clicked.connect(this, &Scrollbar::OnDownButtonClick);
@@ -87,7 +87,7 @@ Scrollbar::Scrollbar(int h)
 	scrollbarBoxBtn->setPosition(0, MaxHeight);
 	scrollbarBoxBtn->setHoldable(true);
 	scrollbarBoxBtn->setTrigger(&touchTrigger, 0);
-	//scrollbarBoxBtn->setTrigger(&wpadTouchTrigger, 1);
+	scrollbarBoxBtn->setTrigger(&wpadTouchTrigger, 1);
 	scrollbarBoxBtn->setEffectGrow();
 	scrollbarBoxBtn->held.connect(this, &Scrollbar::OnBoxButtonHold);
 }

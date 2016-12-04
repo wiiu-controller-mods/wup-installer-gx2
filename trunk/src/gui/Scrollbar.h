@@ -78,7 +78,7 @@ class Scrollbar : public GuiElement, public sigslot::has_slots<>
 		GuiSound * btnSoundClick;
 
 		GuiTrigger touchTrigger;
-		//GuiTrigger wpadTouchTrigger;
+		GuiTrigger wpadTouchTrigger;
 };
 
 #endif
