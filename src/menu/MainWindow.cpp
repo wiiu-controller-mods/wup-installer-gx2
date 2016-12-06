@@ -20,11 +20,11 @@
 #include "utils/logger.h"
 #include "common/common.h"
 #include "common/svnrev.h"
+#include "gui/MessageBox.h"
 
 MainWindow::MainWindow(int w, int h)
     : width(w)
     , height(h)
-    , bgImageColor(w, h, (GX2Color){ 0, 0, 0, 0 })
     , bgParticleImg(w, h, 500)
 	, splashImgData(Resources::GetImageData("splash.png"))
 	, splashImg(splashImgData)
@@ -49,7 +49,6 @@ MainWindow::MainWindow(int w, int h)
 
 MainWindow::~MainWindow()
 {
-    remove(&bgImageColor);
     remove(&bgParticleImg);
     Resources::RemoveImageData(splashImgData);
     Resources::RemoveImageData(titleImgData);
@@ -179,18 +178,29 @@ void MainWindow::SetupMainView()
 	currentTvFrame->append(&splashImg);
     appendTv(currentTvFrame);
 	
-	SetDrcHeader();
-	SetBrowserWindow();
-	
 	currentDrcFrame = new GuiFrame(width, height);
-    currentDrcFrame->setEffect(EFFECT_FADE, 10, 255);
-    currentDrcFrame->setState(GuiElement::STATE_DISABLED);
-    currentDrcFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
-    currentDrcFrame->append(&bgImageColor);
-    currentDrcFrame->append(&bgParticleImg);
-    currentDrcFrame->append(browserWindow);
-    currentDrcFrame->append(&headerFrame);
-    appendDrc(currentDrcFrame);
+	currentDrcFrame->setEffect(EFFECT_FADE, 10, 255);
+	currentDrcFrame->setState(GuiElement::STATE_DISABLED);
+	currentDrcFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+	currentDrcFrame->append(&bgParticleImg);
+	
+	SetBrowserWindow();
+	SetDrcHeader();
+	
+	if(folderList == NULL)
+	{
+		MessageBox * messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONERROR, false);
+		messageBox->setState(GuiElement::STATE_DISABLED);
+		messageBox->setEffect(EFFECT_FADE, 10, 255);
+		messageBox->setTitle("Error:");
+		messageBox->setMessage("No instalable content found:");
+		messageBox->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+		messageBox->messageOkClicked.connect(this, &MainWindow::OnErrorMessageBoxClick);
+		
+		currentDrcFrame->append(messageBox);
+	}
+	
+	appendDrc(currentDrcFrame);
 }
 
 void MainWindow::SetDrcHeader()
@@ -212,23 +222,67 @@ void MainWindow::SetDrcHeader()
 	headerFrame.append(&titleImg);
 	headerFrame.append(&titleText);
 	headerFrame.append(&versionText);
+	
+	currentDrcFrame->append(&headerFrame);
 }
 
 void MainWindow::SetBrowserWindow()
 {
-	folderList = new CFolderList();
+	browserWindow = NULL;
 	
-	/*if(!folderList->GetCount())
+	if(folderList == NULL)
+		folderList = new CFolderList();
+	
+	if(!folderList->GetCount())
 	{
-		ShowMessage("not installable content found");
 		delete folderList;
 		folderList = NULL;
 		return;
-	}*/
+	}
 	
 	browserWindow = new BrowserWindow(920, height, folderList);
 	browserWindow->setAlignment(ALIGN_LEFT | ALIGN_MIDDLE);
 	browserWindow->setPosition(50, 0);
+	browserWindow->installButtonClicked.connect(this, &MainWindow::OnInstallButtonClicked);
+	currentDrcFrame->append(browserWindow);
+}
+
+void MainWindow::OnInstallButtonClicked(GuiElement *element)
+{
+	browserWindow->setEffect(EFFECT_FADE, -10, 255);
+    browserWindow->setState(GuiElement::STATE_DISABLED);
+    browserWindow->effectFinished.connect(this, &MainWindow::OnBrowserCloseEffectFinish);
+	
+	MessageBox * messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONINFORMATION, false);
+	messageBox->setState(GuiElement::STATE_DISABLED);
+    messageBox->setEffect(EFFECT_FADE, 10, 255);
+    messageBox->setTitle("title");
+    messageBox->setMessage("message");
+    messageBox->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+    messageBox->messageOkClicked.connect(this, &MainWindow::OnMessageBoxClick);
+	
+    appendDrc(messageBox);
+}
+
+void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
+{
+    //! remove element from draw list and push to delete queue
+    currentDrcFrame->remove(element);
+    AsyncDeleter::pushForDelete(element);
+}
+void MainWindow::OnMessageBoxClick(GuiElement *element, int ok)
+{
+	element->setEffect(EFFECT_FADE, -10, 255);
+    element->setState(GuiElement::STATE_DISABLED);
+    element->effectFinished.connect(this, &MainWindow::OnCloseEffectFinish);
+	
+	SetBrowserWindow();
+	currentDrcFrame->bringToFront(&headerFrame);
+}
+
+void MainWindow::OnErrorMessageBoxClick(GuiElement *element, int ok)
+{
+	Application::instance()->quit();
 }
 
 void MainWindow::OnOpenEffectFinish(GuiElement *element)
@@ -238,9 +292,9 @@ void MainWindow::OnOpenEffectFinish(GuiElement *element)
     element->clearState(GuiElement::STATE_DISABLED);
 }
 
-/*void MainWindow::OnCloseEffectFinish(GuiElement *element)
+void MainWindow::OnCloseEffectFinish(GuiElement *element)
 {
     //! remove element from draw list and push to delete queue
     remove(element);
     AsyncDeleter::pushForDelete(element);
-}*/
+}

@@ -127,24 +127,22 @@ public:
         guiMutex.unlock();
     }
 	
-	/*enum
-	{
-		SELECT_MODE = 0;
-		INSTALL_MODE = 1;
-	}*/
-	
 private:
     void SetupMainView(void);
 	void SetDrcHeader(void);
 	void SetBrowserWindow(void);
 	
-	void OnOpenEffectFinish(GuiElement *element);
-    
+	void OnInstallButtonClicked(GuiElement *element);
+	void OnBrowserCloseEffectFinish(GuiElement *element);
+	void OnMessageBoxClick(GuiElement *element, int ok);
+	void OnErrorMessageBoxClick(GuiElement *element, int ok);
+    void OnOpenEffectFinish(GuiElement *element);
+	void OnCloseEffectFinish(GuiElement *element);
+	
 	int width, height;
     std::vector<GuiElement *> drcElements;
     std::vector<GuiElement *> tvElements;
 
-    GuiImage bgImageColor;
     GuiParticleImage bgParticleImg;
 	
 	GuiImageData *splashImgData;
