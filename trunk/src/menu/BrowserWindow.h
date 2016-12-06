@@ -27,11 +27,17 @@ public:
     BrowserWindow(int w, int h, CFolderList * folderList);
     virtual ~BrowserWindow();
 	
+	sigslot::signal1<GuiElement *> installButtonClicked;
+	
 private:
-    void OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
-	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
-	void OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);	
-	int SearchSelectedButton();
+    int SearchSelectedButton();
+	
+	void OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
+	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
+	void OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
+	void OnPlusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
+	void OnMinusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
+	void OnInstallButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
 	
 	void OnScrollbarListChange(int selectItem, int pageIndex);
 	
@@ -43,16 +49,37 @@ private:
     GuiImageData *buttonCheckedImageData;
     GuiImageData *buttonHighlightedImageData;
 	
-    GuiTrigger touchTrigger;
+    GuiImageData *selectImageData;
+    GuiImage selectImg;
+    GuiImage unselectImg;
+    GuiImage installImg;
+	
+	GuiImageData *plusImageData;
+    GuiImageData *minusImageData;
+    GuiImage plusImg;
+    GuiImage minusImg;
+	
+	GuiText plusTxt;
+	GuiText minusTxt;
+	GuiText installTxt;
+    
+	GuiTrigger touchTrigger;
     GuiTrigger buttonATrigger;
     
     GuiTrigger buttonUpTrigger;
     GuiTrigger buttonDownTrigger;
     
+	GuiTrigger plusTrigger;
+	GuiTrigger minusTrigger;
+    
     GuiButton DPADButtons;
     GuiButton AButton;
 	
-	int currentYOffset;
+	GuiButton plusButton;
+	GuiButton minusButton;
+	GuiButton installButton;
+	
+    int currentYOffset;
 	int buttonCount;
 	
     typedef struct

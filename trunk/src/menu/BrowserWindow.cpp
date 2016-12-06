@@ -25,12 +25,28 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     , buttonImageData(Resources::GetImageData("choiceUncheckedRectangle.png"))
     , buttonCheckedImageData(Resources::GetImageData("choiceCheckedRectangle.png"))
     , buttonHighlightedImageData(Resources::GetImageData("choiceSelectedRectangle.png"))
+    , selectImageData(Resources::GetImageData("select_button.png"))
+	, selectImg(selectImageData)
+	, unselectImg(selectImageData)
+	, installImg(selectImageData)
+    , plusImageData(Resources::GetImageData("plus.png"))
+    , minusImageData(Resources::GetImageData("minus.png"))
+	, plusImg(plusImageData)
+	, minusImg(minusImageData)
+	, plusTxt("Select All", 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
+	, minusTxt("Unselect All", 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
+	, installTxt("Install", 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
     , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
     , buttonATrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_A, true)
     , buttonUpTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_UP | GuiTrigger::STICK_L_UP, true)
     , buttonDownTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_DOWN | GuiTrigger::STICK_L_DOWN, true)
+    , plusTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_PLUS, true)
+    , minusTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_MINUS, true)
     , DPADButtons(w,h)
     , AButton(w,h)
+	, plusButton(selectImg.getWidth(), selectImg.getHeight())
+	, minusButton(selectImg.getWidth(), selectImg.getHeight())
+	, installButton(selectImg.getWidth(), selectImg.getHeight())
 {
 	folderList = list;
 	currentYOffset = 0;
@@ -51,6 +67,8 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 		folderButtons[i].folderButton->setSoundClick(buttonClickSound);
 		folderButtons[i].folderButton->setImage(folderButtons[i].folderButtonImg);
 		folderButtons[i].folderButton->setImageChecked(folderButtons[i].folderButtonCheckedImg);
+		if(folderList->IsSelected(i))
+			folderButtons[i].folderButton->check();
 		
 		folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * i);
 		folderButtons[i].folderButton->setAlignment(ALIGN_LEFT | ALIGN_MIDDLE);
@@ -79,6 +97,46 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     AButton.clicked.connect(this, &BrowserWindow::OnAButtonClick);
 	this->append(&AButton);
 	
+	plusImg.setAlignment(ALIGN_BOTTOM | ALIGN_RIGHT);
+	plusImg.setPosition(-10, 10);
+    plusTxt.setMaxWidth(selectImg.getWidth()-5, GuiText::WRAP);
+    plusButton.setLabel(&plusTxt);
+    plusButton.setImage(&selectImg);
+	plusButton.setIcon(&plusImg);
+    plusButton.setAlignment(ALIGN_TOP | ALIGN_RIGHT);
+    plusButton.setPosition(240, -135);
+    plusButton.clicked.connect(this, &BrowserWindow::OnPlusButtonClick);
+    plusButton.setTrigger(&plusTrigger);
+    plusButton.setTrigger(&touchTrigger);
+    plusButton.setSoundClick(buttonClickSound);
+    plusButton.setEffectGrow();
+    this->append(&plusButton);
+
+    minusImg.setAlignment(ALIGN_BOTTOM | ALIGN_RIGHT);
+	minusImg.setPosition(-10, 10);
+	minusTxt.setMaxWidth(unselectImg.getWidth()-5, GuiText::WRAP);
+    minusButton.setLabel(&minusTxt);
+    minusButton.setImage(&unselectImg);
+	minusButton.setIcon(&minusImg);
+    minusButton.setAlignment(ALIGN_TOP | ALIGN_RIGHT);
+    minusButton.setPosition(240, -(selectImg.getWidth()+20) - 135);
+    minusButton.clicked.connect(this, &BrowserWindow::OnMinusButtonClick);
+    minusButton.setTrigger(&minusTrigger);
+    minusButton.setTrigger(&touchTrigger);
+    minusButton.setSoundClick(buttonClickSound);
+    minusButton.setEffectGrow();
+    this->append(&minusButton);
+	
+	installTxt.setMaxWidth(unselectImg.getWidth()-5, GuiText::WRAP);
+    installButton.setLabel(&installTxt);
+    installButton.setImage(&installImg);
+	installButton.setAlignment(ALIGN_TOP | ALIGN_RIGHT);
+    installButton.setPosition(240, -(selectImg.getWidth()+20)*2 - 135);
+    installButton.clicked.connect(this, &BrowserWindow::OnInstallButtonClick);
+    installButton.setTrigger(&touchTrigger);
+    installButton.setSoundClick(buttonClickSound);
+    installButton.setEffectGrow();
+    this->append(&installButton);
 }
 
 BrowserWindow::~BrowserWindow()
@@ -97,7 +155,22 @@ BrowserWindow::~BrowserWindow()
     Resources::RemoveImageData(buttonImageData);
     Resources::RemoveImageData(buttonCheckedImageData);
     Resources::RemoveImageData(buttonHighlightedImageData);
+    Resources::RemoveImageData(selectImageData);
+    Resources::RemoveImageData(plusImageData);
+    Resources::RemoveImageData(minusImageData);
     Resources::RemoveSound(buttonClickSound);
+}
+
+int BrowserWindow::SearchSelectedButton()
+{
+	int index = -1;
+	for(int i = 0; i < buttonCount && index < 0; i++)
+	{
+		if(folderButtons[i].folderButton->getState() == STATE_SELECTED)
+			index = i;
+	}
+	
+	return index;
 }
 
 void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
@@ -114,18 +187,6 @@ void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *
 		else
 			folderButtons[i].folderButton->clearState(STATE_SELECTED);
 	}
-}
-
-int BrowserWindow::SearchSelectedButton()
-{
-	int index = -1;
-	for(int i = 0; i < buttonCount && index < 0; i++)
-	{
-		if(folderButtons[i].folderButton->getState() == STATE_SELECTED)
-			index = i;
-	}
-	
-	return index;
 }
 
 void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
@@ -163,6 +224,35 @@ void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controll
 	scrollbar.SetSelectedItem((buttonImageData->getHeight() + 30) * index);
 }
 	
+void BrowserWindow::OnPlusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
+{
+	for(int i = 0; i < buttonCount; i++)
+	{
+		if(!folderList->IsSelected(i))
+		{
+			folderList->Select(i);
+			folderButtons[i].folderButton->check();
+		}
+	}
+}
+
+void BrowserWindow::OnMinusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
+{
+	for(int i = 0; i < buttonCount; i++)
+	{
+		if(folderList->IsSelected(i))
+		{
+			folderList->UnSelect(i);
+			folderButtons[i].folderButton->check();
+		}
+	}
+}
+
+void BrowserWindow::OnInstallButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
+{
+	installButtonClicked(this);
+}
+
 void BrowserWindow::OnScrollbarListChange(int selectItem, int pageIndex)
 {
     currentYOffset = selectItem + pageIndex;
@@ -172,33 +262,3 @@ void BrowserWindow::OnScrollbarListChange(int selectItem, int pageIndex)
         folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * i + currentYOffset);
     }
 }
-
-/*void BrowserWindow::OnSubMenuCloseClicked(GuiElement *element)
-{
-    //! disable element for triggering buttons again
-    element->setState(GuiElement::STATE_DISABLED);
-    element->setEffect(EFFECT_FADE, -10, 0);
-    element->effectFinished.connect(this, &SettingsLanguageMenu::OnSubMenuCloseEffectFinish);
-
-    //! fade in category selection
-    languageFrame.setEffect(EFFECT_FADE, 10, 255);
-    append(&languageFrame);
-}*/
-
-/*void BrowserWindow::OnSubMenuOpenEffectFinish(GuiElement *element)
-{
-    //! make element clickable again
-    element->clearState(GuiElement::STATE_DISABLED);
-    element->effectFinished.disconnect(this);
-    //! remove category selection from settings
-    remove(&languageFrame);
-}*/
-
-/*void BrowserWindow::OnSubMenuCloseEffectFinish(GuiElement *element)
-{
-    remove(element);
-    AsyncDeleter::pushForDelete(element);
-
-    //! enable all elements again
-    languageFrame.clearState(GuiElement::STATE_DISABLED);
-}*/
