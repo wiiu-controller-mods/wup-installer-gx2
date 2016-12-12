@@ -17,7 +17,7 @@
 #include "MainWindow.h"
 #include "Application.h"
 #include "utils/StringTools.h"
-#include "utils/logger.h"
+//#include "utils/logger.h"
 #include "common/common.h"
 #include "common/svnrev.h"
 #include "gui/MessageBox.h"
@@ -34,6 +34,7 @@ MainWindow::MainWindow(int w, int h)
 	, versionText(WUP_GX2_VERSION)
 {
 	folderList = NULL;
+	installWindow = NULL;
 	
     for(int i = 0; i < 4; i++)
     {
@@ -253,15 +254,14 @@ void MainWindow::OnInstallButtonClicked(GuiElement *element)
     browserWindow->setState(GuiElement::STATE_DISABLED);
     browserWindow->effectFinished.connect(this, &MainWindow::OnBrowserCloseEffectFinish);
 	
-	MessageBox * messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONINFORMATION, false);
-	messageBox->setState(GuiElement::STATE_DISABLED);
-    messageBox->setEffect(EFFECT_FADE, 10, 255);
-    messageBox->setTitle("title");
-    messageBox->setMessage("message");
-    messageBox->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
-    messageBox->messageOkClicked.connect(this, &MainWindow::OnMessageBoxClick);
+	installWindow = new InstallWindow(folderList);
+	installWindow->setState(GuiElement::STATE_DISABLED);
+    installWindow->setEffect(EFFECT_FADE, 10, 255);
+    installWindow->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+    installWindow->closeInstallWindow.connect(this, &MainWindow::OnCloseInstallWindow);
+    //installWindow->updateFolderList.connect(this, &MainWindow::OnInstallWindowUpdateList);
 	
-    appendDrc(messageBox);
+	append(installWindow);
 }
 
 void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
@@ -270,11 +270,9 @@ void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
     currentDrcFrame->remove(element);
     AsyncDeleter::pushForDelete(element);
 }
-void MainWindow::OnMessageBoxClick(GuiElement *element, int ok)
+void MainWindow::OnCloseInstallWindow(GuiElement *element)
 {
-	element->setEffect(EFFECT_FADE, -10, 255);
-    element->setState(GuiElement::STATE_DISABLED);
-    element->effectFinished.connect(this, &MainWindow::OnCloseEffectFinish);
+	element->effectFinished.connect(this, &MainWindow::OnCloseEffectFinish);
 	
 	SetBrowserWindow();
 	currentDrcFrame->bringToFront(&headerFrame);

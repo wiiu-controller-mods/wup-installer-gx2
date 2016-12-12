@@ -22,6 +22,7 @@
 #include "gui/Gui.h"
 #include "fs/CFolderList.hpp"
 #include "BrowserWindow.h"
+#include "InstallWindow.h"
 #include "gui/GuiParticleImage.h"
 //#include "system/CMutex.h"
 
@@ -134,7 +135,7 @@ private:
 	
 	void OnInstallButtonClicked(GuiElement *element);
 	void OnBrowserCloseEffectFinish(GuiElement *element);
-	void OnMessageBoxClick(GuiElement *element, int ok);
+	void OnCloseInstallWindow(GuiElement *element);
 	void OnErrorMessageBoxClick(GuiElement *element, int ok);
     void OnOpenEffectFinish(GuiElement *element);
 	void OnCloseEffectFinish(GuiElement *element);
@@ -163,6 +164,7 @@ private:
 	
 	CFolderList * folderList;
     BrowserWindow * browserWindow;
+	InstallWindow * installWindow;
 
     CMutex guiMutex;
 };
