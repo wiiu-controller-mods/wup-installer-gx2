@@ -23,14 +23,15 @@ class MessageBox : public GuiFrame, public sigslot::has_slots<>
 {
 public:	
 	
-	MessageBox(int typeButtons = BT_NOBUTTON, int typeIcons = IT_NOICON, bool progressBar = false);
+	MessageBox(int typeButtons = BT_NOBUTTON, int typeIcons = IT_NOICON, bool progressbar = false);
 	
 	virtual ~MessageBox();
 	
-	void setProgress(f32 percent);
+	void reload(std::string title, std::string message, int typeButtons = BT_NOBUTTON, int typeIcons = IT_NOICON, bool progressBar = false, std::string pbInfo = " ");
 	void setTitle(const std::string & title);
 	void setMessage(const std::string & message);
-	void setInfo(const std::string & info);
+	void setProgress(f32 percent);
+	void setProgressBarInfo(const std::string & info);
 	
     sigslot::signal2<GuiElement *, int> messageCancelClicked;
 	sigslot::signal2<GuiElement *, int> messageOkClicked;
@@ -42,7 +43,8 @@ public:
 		BT_NOBUTTON = -1,
 		BT_OK,
 		BT_OKCANCEL,
-		BT_YESNO
+		BT_YESNO,
+		BT_USB
     };
 	
 	enum IconType
@@ -81,11 +83,15 @@ private:
     {
         messageNoClicked(this, MR_NO);
     }
-
-    void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
-	void UpdateButtons(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
 	
-	GuiFrame messageBoxFrame;
+	void setIcon(int typeIcons);
+	void setButtons(int typeButtons);
+	
+	void OnReloadFadeOutFinished(GuiElement * element);
+	void OnReloadFadeInFinished(GuiElement * element);
+	
+	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
+	void UpdateButtons(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
 	
 	GuiImage bgBlur;
 	
@@ -101,7 +107,7 @@ private:
     GuiImage boxImage;   
 	
     GuiTrigger touchTrigger;
-    GuiTrigger wpadTouchTrigger;
+    //GuiTrigger wpadTouchTrigger;
     GuiTrigger buttonATrigger;
     GuiTrigger buttonBTrigger;
     GuiTrigger buttonLeftTrigger;
@@ -131,6 +137,16 @@ private:
 	
     int buttonCount;
 	int selectedButton;
+	bool progressBar;
+	
+	int newButtonsType;
+	int newIconType;
+	bool newProgressBar;
+	std::string newTitle;
+	std::string newMessage;
+	std::string newInfo;
+	
+	GuiFrame progressFrame;
 };
 
 #endif //_MESSAGE_BOX_H_

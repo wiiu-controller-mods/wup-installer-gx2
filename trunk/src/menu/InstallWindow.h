@@ -18,14 +18,21 @@ public:
     }
 
     //sigslot::signal0<> updateFolderList;
-    sigslot::signal1<GuiElement *> closeInstallWindow;
+    sigslot::signal1<GuiElement *> installWindowClosed;
 	
 private:
-    void executeThread();
-	
-	void OnValidInstallClick(GuiElement * element, int val);
+    void OnValidInstallClick(GuiElement * element, int val);
+    void OnDestinationChoice(GuiElement * element, int choice);
 	void OnCloseWindow(GuiElement * element, int val);
+	void OnWindowClosed(GuiElement * element);
+	void OnOpenEffectFinish(GuiElement *element);
+	void OnCloseEffectFinish(GuiElement *element);
+	
+	void executeThread();
 	void InstallProcess();
+	
+	GuiFrame * drcFrame;
+	//GuiFrame * tvFrame;
     
     CFolderList * folderList;
 	
