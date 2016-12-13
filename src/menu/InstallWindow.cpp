@@ -46,27 +46,43 @@ InstallWindow::InstallWindow(CFolderList * list)
 		messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 	}
 	
-	mainWindow->appendDrc(messageBox);
+	drcFrame = new GuiFrame(0, 0);
+	drcFrame->setEffect(EFFECT_FADE, 10, 255);
+	drcFrame->setState(GuiElement::STATE_DISABLED);
+	drcFrame->effectFinished.connect(this, &InstallWindow::OnOpenEffectFinish);
+	drcFrame->append(messageBox);
+	
+	mainWindow->appendDrc(drcFrame);
 }
 
 InstallWindow::~InstallWindow()
 {
-	mainWindow->remove(messageBox);
+	drcFrame->remove(messageBox);
+	mainWindow->remove(drcFrame);
+	delete drcFrame;
 	delete messageBox;
 }
 
 void InstallWindow::OnValidInstallClick(GuiElement * element, int val)
 {
-	closeInstallWindow(this);//
-	//choisir nand ou usb
+	messageBox->messageYesClicked.disconnect(this);
+	messageBox->messageNoClicked.disconnect(this);
+	messageBox->reload("Where do you want to install?", " ", MessageBox::BT_USB, MessageBox::IT_ICONQUESTION);
+	messageBox->messageYesClicked.connect(this, &InstallWindow::OnDestinationChoice);
+	messageBox->messageNoClicked.connect(this, &InstallWindow::OnDestinationChoice);
 }
 
-void InstallWindow::OnCloseWindow(GuiElement * element, int val)
+void InstallWindow::OnDestinationChoice(GuiElement * element, int choice)
 {
-	element->setEffect(EFFECT_FADE, -10, 255);
-    element->setState(GuiElement::STATE_DISABLED);
-    
-	closeInstallWindow(this);
+	//MessageBox::MR_YES //nand
+	//MessageBox::MR_NO //usb
+	
+	messageBox->messageYesClicked.disconnect(this);
+	messageBox->messageNoClicked.disconnect(this);
+	messageBox->reload("You choosed to install to:", choice == MessageBox::MR_YES ? "Internal Memory" : "USB", MessageBox::BT_OK, MessageBox::IT_ICONINFORMATION);
+	messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
+	
+	///////////////////
 }
 
 void InstallWindow::executeThread()
@@ -162,4 +178,32 @@ void InstallWindow::InstallProcess()
 	}
 
 	return MissingImages.size();*/
+}
+
+void InstallWindow::OnCloseWindow(GuiElement * element, int val)
+{
+	messageBox->setEffect(EFFECT_FADE, -10, 255);
+    messageBox->setState(GuiElement::STATE_DISABLED);
+    messageBox->effectFinished.connect(this, &InstallWindow::OnWindowClosed);
+	
+	
+}
+
+void InstallWindow::OnWindowClosed(GuiElement *element)
+{
+	messageBox->effectFinished.disconnect(this);
+	installWindowClosed(this);
+	AsyncDeleter::pushForDelete(this);
+}
+
+void InstallWindow::OnOpenEffectFinish(GuiElement *element)
+{
+	element->effectFinished.disconnect(this);
+    element->clearState(GuiElement::STATE_DISABLED);
+}
+
+void InstallWindow::OnCloseEffectFinish(GuiElement *element)
+{
+	remove(element);
+    AsyncDeleter::pushForDelete(element);
 }

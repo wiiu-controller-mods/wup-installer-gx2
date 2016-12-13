@@ -245,6 +245,9 @@ void MainWindow::SetBrowserWindow()
 	browserWindow->setAlignment(ALIGN_LEFT | ALIGN_MIDDLE);
 	browserWindow->setPosition(50, 0);
 	browserWindow->installButtonClicked.connect(this, &MainWindow::OnInstallButtonClicked);
+	browserWindow->setState(GuiElement::STATE_DISABLED);
+	browserWindow->setEffect(EFFECT_FADE, 10, 255);
+	browserWindow->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
 	currentDrcFrame->append(browserWindow);
 }
 
@@ -255,13 +258,8 @@ void MainWindow::OnInstallButtonClicked(GuiElement *element)
     browserWindow->effectFinished.connect(this, &MainWindow::OnBrowserCloseEffectFinish);
 	
 	installWindow = new InstallWindow(folderList);
-	installWindow->setState(GuiElement::STATE_DISABLED);
-    installWindow->setEffect(EFFECT_FADE, 10, 255);
-    installWindow->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
-    installWindow->closeInstallWindow.connect(this, &MainWindow::OnCloseInstallWindow);
+	installWindow->installWindowClosed.connect(this, &MainWindow::OnInstallWindowClosed);
     //installWindow->updateFolderList.connect(this, &MainWindow::OnInstallWindowUpdateList);
-	
-	append(installWindow);
 }
 
 void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
@@ -270,10 +268,8 @@ void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
     currentDrcFrame->remove(element);
     AsyncDeleter::pushForDelete(element);
 }
-void MainWindow::OnCloseInstallWindow(GuiElement *element)
+void MainWindow::OnInstallWindowClosed(GuiElement *element)
 {
-	element->effectFinished.connect(this, &MainWindow::OnCloseEffectFinish);
-	
 	SetBrowserWindow();
 	currentDrcFrame->bringToFront(&headerFrame);
 }
