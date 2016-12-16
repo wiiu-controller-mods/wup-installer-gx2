@@ -27,9 +27,10 @@ private:
 	void OnWindowClosed(GuiElement * element);
 	void OnOpenEffectFinish(GuiElement *element);
 	void OnCloseEffectFinish(GuiElement *element);
+	void OnInstallProcessCancel(GuiElement *element, int val);
 	
 	void executeThread();
-	void InstallProcess();
+	void InstallProcess(int pos, int total);
 	
 	GuiFrame * drcFrame;
 	//GuiFrame * tvFrame;
@@ -41,6 +42,16 @@ private:
 	MainWindow * mainWindow;
 	
 	int folderCount;
+	bool canceled;
+	//bool timer;
+	int target;
+	
+	enum
+	{
+		NAND,
+		USB
+	};
+	
 };
 
 #endif

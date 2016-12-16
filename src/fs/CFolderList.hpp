@@ -50,6 +50,7 @@ class CFolderList
 		void UnSelect(int ind);
 		void SelectAll();
 		void UnSelectAll();
+		int GetFirstSelected();
 		
 		void Click(int ind);
 		

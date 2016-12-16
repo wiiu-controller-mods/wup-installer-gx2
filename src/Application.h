@@ -55,6 +55,14 @@ public:
     void quit(void) {
         exitApplication = true;
     }
+	
+	void exitDisable() {
+		exitDisabled = true;
+	}
+	
+	void exitEnable() {
+		exitDisabled = false;
+	}
 
 private:
     Application();
@@ -70,6 +78,8 @@ private:
     MainWindow *mainWindow;
 	MainStartUp *mainStartUp;
     GuiController *controller[5];
+	
+	bool exitDisabled;
 };
 
 #endif //_APPLICATION_H

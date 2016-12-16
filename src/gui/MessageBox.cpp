@@ -24,13 +24,11 @@ MessageBox::MessageBox(int typeButtons, int typeIcons, bool progressbar)
     , boxImageData(Resources::GetImageData("messageBox.png"))
     , boxImage(boxImageData)
     , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
-    //, wpadTouchTrigger(GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5, GuiTrigger::BUTTON_A)
-    , buttonATrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_A, true)
-    , buttonBTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_B, true)
-    , buttonLeftTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_LEFT | GuiTrigger::STICK_L_LEFT, true)
-    , buttonRightTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_RIGHT | GuiTrigger::STICK_L_RIGHT, true)
+    , buttonATrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_A, true)
+    , buttonLeftTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_LEFT | GuiTrigger::STICK_L_LEFT, true)
+    , buttonRightTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_RIGHT | GuiTrigger::STICK_L_RIGHT, true)
 	, buttonImageData(Resources::GetImageData("messageBoxButton.png"))
-    //, buttonHighlightedImageData(Resources::GetImageData("messageBoxButtonSelected.png"))
+    , buttonHighlightedImageData(Resources::GetImageData("messageBoxButtonSelected.png"))
 	, bgImageData(Resources::GetImageData("progressBar.png"))
     , bgImage(bgImageData)
     , progressImageBlack(bgImage.getWidth(), bgImage.getHeight(), (GX2Color){0, 0, 0, 255})
@@ -52,18 +50,26 @@ MessageBox::MessageBox(int typeButtons, int typeIcons, bool progressbar)
 	titleText.setMaxWidth(boxImage.getWidth() - 50.0f, GuiText::WRAP);
     titleText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
 	
-	messageText.setColor(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
-    messageText.setFontSize(38);
-	messageText.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
-    messageText.setPosition(0, 0);
-	messageText.setParent(&boxImage);
-	messageText.setMaxWidth(boxImage.getWidth() - 50.0f, GuiText::WRAP);
-    messageText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
+	messageText1.setColor(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
+    messageText1.setFontSize(38);
+	messageText1.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
+    messageText1.setPosition(0, 0);
+	messageText1.setParent(&boxImage);
+	messageText1.setMaxWidth(boxImage.getWidth() - 50.0f, GuiText::WRAP);
+    messageText1.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
 	
-	// append on top
+	messageText2.setColor(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
+    messageText2.setFontSize(38);
+	messageText2.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
+    messageText2.setPosition(0, -50);
+	messageText2.setParent(&boxImage);
+	messageText2.setMaxWidth(boxImage.getWidth() - 50.0f, GuiText::WRAP);
+    messageText2.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
+	
 	this->append(&boxImage);
 	this->append(&titleText);
-    this->append(&messageText);
+    this->append(&messageText1);
+    this->append(&messageText2);
 	
 	iconImageData = NULL;
 	iconImage = NULL;
@@ -97,7 +103,6 @@ MessageBox::MessageBox(int typeButtons, int typeIcons, bool progressbar)
 		this->append(&progressFrame);
 	
 	DPADButtons.setTrigger(&buttonATrigger);
-    DPADButtons.setTrigger(&buttonBTrigger);
     DPADButtons.setTrigger(&buttonLeftTrigger);
     DPADButtons.setTrigger(&buttonRightTrigger);
     DPADButtons.clicked.connect(this, &MessageBox::OnDPADClick);
@@ -111,7 +116,7 @@ MessageBox::~MessageBox()
     {
         this->remove(messageButtons[i].messageButton);
 		delete messageButtons[i].messageButtonImg;
-        //delete messageButtons[i].messageButtonHighlightedImg;
+        delete messageButtons[i].messageButtonHighlightedImg;
         delete messageButtons[i].messageButton;
         delete messageButtons[i].messageButtonText;
     }
@@ -132,13 +137,14 @@ MessageBox::~MessageBox()
 	Resources::RemoveImageData(bgImageData);
 }
 
-void MessageBox::reload(std::string title, std::string message, int typeButtons, int typeIcons, bool progressbar, std::string pbInfo)
+void MessageBox::reload(std::string title, std::string message1, std::string message2, int typeButtons, int typeIcons, bool progressbar, std::string pbInfo)
 {
 	newButtonsType = typeButtons;
 	newIconType = typeIcons;
 	newProgressBar = progressbar;
 	newTitle = title;
-	newMessage = message;
+	newMessage1 = message1;
+	newMessage2 = message2;
 	newInfo = pbInfo;
 	
 	this->setState(GuiElement::STATE_DISABLED);
@@ -147,7 +153,8 @@ void MessageBox::reload(std::string title, std::string message, int typeButtons,
 		progressFrame.setEffect(EFFECT_FADE, -10, 255);
 	
 	titleText.setEffect(EFFECT_FADE, -10, 255);
-	messageText.setEffect(EFFECT_FADE, -10, 255);
+	messageText1.setEffect(EFFECT_FADE, -10, 255);
+	messageText2.setEffect(EFFECT_FADE, -10, 255);
 	if(iconImage)
 		iconImage->setEffect(EFFECT_FADE, -10, 255);
 	for(int i = 0; i < buttonCount; i++)
@@ -164,7 +171,8 @@ void MessageBox::OnReloadFadeOutFinished(GuiElement * element)
 		this->remove(&progressFrame);
 	
 	setTitle(newTitle);
-	setMessage(newMessage);
+	setMessage1(newMessage1);
+	setMessage2(newMessage2);
 	setIcon(newIconType);
 	setButtons(newButtonsType);
 	setProgressBarInfo(newInfo);
@@ -178,7 +186,8 @@ void MessageBox::OnReloadFadeOutFinished(GuiElement * element)
 	setProgress(0.0f);
     
 	titleText.setEffect(EFFECT_FADE, 10, 255);
-	messageText.setEffect(EFFECT_FADE, 10, 255);
+	messageText1.setEffect(EFFECT_FADE, 10, 255);
+	messageText2.setEffect(EFFECT_FADE, 10, 255);
 	if(newIconType != IT_NOICON)
 		iconImage->setEffect(EFFECT_FADE, 10, 255);
 	if(newButtonsType != BT_NOBUTTON)
@@ -201,9 +210,14 @@ void MessageBox::setTitle(const std::string & title)
 	titleText.setText(title.c_str());
 }
 
-void MessageBox::setMessage(const std::string & message)
+void MessageBox::setMessage1(const std::string & message)
 {
-	messageText.setText(message.c_str());
+	messageText1.setText(message.c_str());
+}
+
+void MessageBox::setMessage2(const std::string & message)
+{
+	messageText2.setText(message.c_str());
 }
 
 void MessageBox::setIcon(int typeIcons)
@@ -257,59 +271,51 @@ void MessageBox::setIcon(int typeIcons)
 
 void MessageBox::setButtons(int typeButtons)
 {
-	//this->setState(STATE_DISABLED);
-	//this->buttonsUpdated.connect(this, &MessageBox::OnButtonsUpdated);
-	
-	log_printf("test 1\n");
-    for(int i = 0; i < buttonCount; i++)
+	for(int i = 0; i < buttonCount; i++)
     {
-        log_printf("test 1.1\n");
-		messageButtons[i].messageButton->setState(STATE_DEFAULT);
+        messageButtons[i].messageButton->setState(STATE_DEFAULT);
 		messageButtons[i].messageButton->clicked.disconnect(this);
 		this->remove(messageButtons[i].messageButton);
 		delete messageButtons[i].messageButtonImg;
-        //delete messageButtons[i].messageButtonHighlightedImg;
+        delete messageButtons[i].messageButtonHighlightedImg;
         delete messageButtons[i].messageButton;
         delete messageButtons[i].messageButtonText;
     }
 	messageButtons.clear();
 	buttonCount = -1;
 	
-	log_printf("test 2\n");
-    const std::string ButtonString[] =
+	const std::string ButtonString[] =
 	{
 		"Ok",
 		"Cancel",
 		"Yes",
 		"No",
-		"NAND",
+		"Nand",
 		"USB"
 	};
 	
-	log_printf("test 3\n");
-    if(typeButtons != BT_NOBUTTON)
+	if(typeButtons != BT_NOBUTTON)
 	{
-		selectedButton = 0;
+		selectedButtonDPAD = -1;
 		
-		typeButtons > 0 ? buttonCount = 2 : buttonCount = 1;
+		typeButtons > 1 ? buttonCount = 2 : buttonCount = 1;
 		messageButtons.resize(buttonCount);
 		
-		log_printf("test 3.1 buttoncount = %d\n", buttonCount);
 		for(int i = 0; i < buttonCount; i++)
 		{      
-			log_printf("test 3.2\n");
 			messageButtons[i].messageButtonImg = new GuiImage(buttonImageData);
-			//messageButtons[i].messageButtonHighlightedImg = new GuiImage(buttonHighlightedImageData);
+			messageButtons[i].messageButtonHighlightedImg = new GuiImage(buttonHighlightedImageData);
 			messageButtons[i].messageButton = new GuiButton(messageButtons[i].messageButtonImg->getWidth(), messageButtons[i].messageButtonImg->getHeight());
-			if(typeButtons != BT_OKCANCEL && typeButtons != BT_USB)
+			
+			if(typeButtons == BT_OK || typeButtons == BT_CANCEL || typeButtons == BT_DEST)
 				messageButtons[i].messageButtonText = new GuiText(ButtonString[typeButtons + i].c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
 			else if(typeButtons == BT_OKCANCEL)
-				messageButtons[i].messageButtonText = new GuiText(ButtonString[typeButtons - 1 + i].c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
-			else
-				messageButtons[i].messageButtonText = new GuiText(ButtonString[typeButtons + 1 + i].c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));//nand:yes, usb:no
+				messageButtons[i].messageButtonText = new GuiText(ButtonString[typeButtons - 2 + i].c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
+			else if(typeButtons == BT_YESNO)
+				messageButtons[i].messageButtonText = new GuiText(ButtonString[typeButtons - 1 + i].c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));//nand:yes, usb:no
 			
 			messageButtons[i].messageButtonText->setPosition(0, -10);
-			//messageButtons[i].messageButton->setImageSelectOver(messageButtons[i].messageButtonHighlightedImg);
+			messageButtons[i].messageButton->setImageSelectOver(messageButtons[i].messageButtonHighlightedImg);
 			messageButtons[i].messageButton->setLabel(messageButtons[i].messageButtonText);
 			messageButtons[i].messageButton->setSoundClick(buttonClickSound);
 			messageButtons[i].messageButton->setImage(messageButtons[i].messageButtonImg);
@@ -319,6 +325,11 @@ void MessageBox::setButtons(int typeButtons)
 			{
 				case BT_OK:{
 					messageButtons[i].messageButton->clicked.connect(this, &MessageBox::OnOkButtonClick);
+					messageButtons[i].messageButton->setPosition(0, -240);
+					break;
+				}
+				case BT_CANCEL:{
+					messageButtons[i].messageButton->clicked.connect(this, &MessageBox::OnCancelButtonClick);
 					messageButtons[i].messageButton->setPosition(0, -240);
 					break;
 				}
@@ -332,7 +343,7 @@ void MessageBox::setButtons(int typeButtons)
 					messageButtons[i].messageButton->setPosition(- 220 + (messageButtons[i].messageButtonImg->getWidth()) * i , - 240);
 					break;
 				}
-				case BT_USB:{
+				case BT_DEST:{
 					i == 0 ? messageButtons[i].messageButton->clicked.connect(this, &MessageBox::OnYesButtonClick) : messageButtons[i].messageButton->clicked.connect(this, &MessageBox::OnNoButtonClick);
 					messageButtons[i].messageButton->setPosition(- 220 + (messageButtons[i].messageButtonImg->getWidth()) * i , - 240);
 					break;
@@ -341,20 +352,10 @@ void MessageBox::setButtons(int typeButtons)
 			
 			messageButtons[i].messageButton->setEffectGrow();
 			messageButtons[i].messageButton->setTrigger(&touchTrigger);
-			//messageButtons[i].messageButton->setTrigger(&wpadTouchTrigger);
 			this->append(messageButtons[i].messageButton);
 		}
 	}
-	log_printf("test end\n");
-	
-	//buttonsUpdated();
 }
-
-/*void MessageBox::OnButtonsUpdated()
-{
-	this->buttonsUpdated.disconnect(this);
-	this->resetState();
-}*/
 
 void MessageBox::setProgress(f32 percent)
 {
@@ -370,11 +371,10 @@ void MessageBox::UpdateButtons(GuiButton *button, const GuiController *controlle
 {
     for(int i = 0; i < buttonCount; i++)
     {
-		if(i == selectedButtonDPAD){
+		if(i == selectedButtonDPAD)
 			messageButtons[i].messageButton->setState(STATE_SELECTED);
-		}else{
-			messageButtons[i].messageButton->clearState(STATE_SELECTED);
-		}          
+		else
+			messageButtons[i].messageButton->clearState(STATE_SELECTED);    
     }
 }
 
@@ -382,32 +382,26 @@ void MessageBox::OnDPADClick(GuiButton *button, const GuiController *controller,
 {
 	if(trigger == &buttonATrigger)
 	{
-        //! do not auto launch when wiimote is pointing to screen and presses A
-        if((controller->chan & (GuiTrigger::CHANNEL_2 | GuiTrigger::CHANNEL_3 | GuiTrigger::CHANNEL_4 | GuiTrigger::CHANNEL_5)) && controller->data.validPointer)
-        {
-            return;
-        }
-		OnOkButtonClick(button,controller,trigger);
-		if(selectedButtonDPAD >= 0 && selectedButtonDPAD < buttonCount-1)
-		{
-			selectedButton = selectedButtonDPAD;
-		}           
+        if(selectedButtonDPAD >= 0)
+			messageButtons[selectedButtonDPAD].messageButton->clicked(messageButtons[selectedButtonDPAD].messageButton, controller, trigger);
 	}
-	else if(trigger == &buttonBTrigger)
+	else
 	{
-		OnCancelButtonClick(button,controller,trigger);
-	}
-	else if(trigger == &buttonRightTrigger){
-		selectedButtonDPAD++;
-		if(selectedButtonDPAD >= buttonCount-1){
-			selectedButtonDPAD = buttonCount-1;
+		if(trigger == &buttonRightTrigger)
+		{
+			if(selectedButtonDPAD >= buttonCount-1)
+				return;
+			
+			selectedButtonDPAD++;
 		}
-	}
-	else if(trigger == &buttonLeftTrigger){
-		selectedButtonDPAD--;
-		if(selectedButtonDPAD < 0){
-			selectedButtonDPAD = 0;
+		else if(trigger == &buttonLeftTrigger)
+		{
+			if(selectedButtonDPAD <= 0)
+				return;
+			
+			selectedButtonDPAD--;
 		}
+		
+		UpdateButtons(button,controller,trigger);
 	}
-	UpdateButtons(button,controller,trigger);
 }

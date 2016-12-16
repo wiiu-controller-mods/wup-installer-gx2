@@ -27,9 +27,10 @@ public:
 	
 	virtual ~MessageBox();
 	
-	void reload(std::string title, std::string message, int typeButtons = BT_NOBUTTON, int typeIcons = IT_NOICON, bool progressBar = false, std::string pbInfo = " ");
+	void reload(std::string title, std::string message1, std::string message2, int typeButtons = BT_NOBUTTON, int typeIcons = IT_NOICON, bool progressBar = false, std::string pbInfo = " ");
 	void setTitle(const std::string & title);
-	void setMessage(const std::string & message);
+	void setMessage1(const std::string & message);
+	void setMessage2(const std::string & message);
 	void setProgress(f32 percent);
 	void setProgressBarInfo(const std::string & info);
 	
@@ -42,9 +43,10 @@ public:
     {
 		BT_NOBUTTON = -1,
 		BT_OK,
+		BT_CANCEL,
 		BT_OKCANCEL,
 		BT_YESNO,
-		BT_USB
+		BT_DEST
     };
 	
 	enum IconType
@@ -96,7 +98,8 @@ private:
 	GuiImage bgBlur;
 	
 	GuiText titleText;
-	GuiText messageText;
+	GuiText messageText1;
+	GuiText messageText2;
 	GuiText infoText;
 	
 	GuiImageData *iconImageData;
@@ -107,14 +110,12 @@ private:
     GuiImage boxImage;   
 	
     GuiTrigger touchTrigger;
-    //GuiTrigger wpadTouchTrigger;
     GuiTrigger buttonATrigger;
-    GuiTrigger buttonBTrigger;
     GuiTrigger buttonLeftTrigger;
     GuiTrigger buttonRightTrigger;
 	
 	GuiImageData *buttonImageData;
-    //GuiImageData *buttonHighlightedImageData;
+    GuiImageData *buttonHighlightedImageData;
 	
 	GuiImageData *bgImageData;
     GuiImage bgImage;
@@ -128,7 +129,7 @@ private:
 	typedef struct
     {
         GuiImage *messageButtonImg;
-        //GuiImage *messageButtonHighlightedImg;
+        GuiImage *messageButtonHighlightedImg;
         GuiButton *messageButton;
         GuiText *messageButtonText;
     } MessageButton;
@@ -136,14 +137,14 @@ private:
     std::vector<MessageButton> messageButtons;
 	
     int buttonCount;
-	int selectedButton;
 	bool progressBar;
 	
 	int newButtonsType;
 	int newIconType;
 	bool newProgressBar;
 	std::string newTitle;
-	std::string newMessage;
+	std::string newMessage1;
+	std::string newMessage2;
 	std::string newInfo;
 	
 	GuiFrame progressFrame;
