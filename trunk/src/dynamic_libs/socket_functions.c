@@ -26,42 +26,56 @@
 
 u32 hostIpAddress = 0;
 
+unsigned int nsysnet_handle __attribute__((section(".data"))) = 0;
+
 EXPORT_DECL(void, socket_lib_init, void);
 EXPORT_DECL(int, socket, int domain, int type, int protocol);
 EXPORT_DECL(int, socketclose, int s);
-EXPORT_DECL(int, shutdown, int s, int how);
 EXPORT_DECL(int, connect, int s, void *addr, int addrlen);
 EXPORT_DECL(int, bind, s32 s,struct sockaddr *name,s32 namelen);
 EXPORT_DECL(int, listen, s32 s,u32 backlog);
 EXPORT_DECL(int, accept, s32 s,struct sockaddr *addr,s32 *addrlen);
 EXPORT_DECL(int, send, int s, const void *buffer, int size, int flags);
 EXPORT_DECL(int, recv, int s, void *buffer, int size, int flags);
+EXPORT_DECL(int, recvfrom,int sockfd, void *buf, int len, int flags,struct sockaddr *src_addr, int *addrlen);
 EXPORT_DECL(int, sendto, int s, const void *buffer, int size, int flags, const struct sockaddr *dest, int dest_len);
 EXPORT_DECL(int, setsockopt, int s, int level, int optname, void *optval, int optlen);
 EXPORT_DECL(char *, inet_ntoa, struct in_addr in);
 EXPORT_DECL(int, inet_aton, const char *cp, struct in_addr *inp);
 
+EXPORT_DECL(int, NSSLWrite, int connection, const void* buf, int len,int * written);
+EXPORT_DECL(int, NSSLRead, int connection, const void* buf, int len,int * read);
+EXPORT_DECL(int, NSSLCreateConnection, int context, const char* host, int hotlen,int options,int sock,int block);
+
+void InitAcquireSocket(void)
+{
+    OSDynLoad_Acquire("nsysnet.rpl", &nsysnet_handle);
+}
+
 void InitSocketFunctionPointers(void)
 {
-    unsigned int nsysnet_handle;
     unsigned int *funcPointer = 0;
-    OSDynLoad_Acquire("nsysnet.rpl", &nsysnet_handle);
+
+    InitAcquireSocket();
 
     OS_FIND_EXPORT(nsysnet_handle, socket_lib_init);
     OS_FIND_EXPORT(nsysnet_handle, socket);
     OS_FIND_EXPORT(nsysnet_handle, socketclose);
-    OS_FIND_EXPORT(nsysnet_handle, shutdown);
     OS_FIND_EXPORT(nsysnet_handle, connect);
     OS_FIND_EXPORT(nsysnet_handle, bind);
     OS_FIND_EXPORT(nsysnet_handle, listen);
     OS_FIND_EXPORT(nsysnet_handle, accept);
     OS_FIND_EXPORT(nsysnet_handle, send);
     OS_FIND_EXPORT(nsysnet_handle, recv);
+    OS_FIND_EXPORT(nsysnet_handle, recvfrom);
     OS_FIND_EXPORT(nsysnet_handle, sendto);
     OS_FIND_EXPORT(nsysnet_handle, setsockopt);
     OS_FIND_EXPORT(nsysnet_handle, inet_ntoa);
     OS_FIND_EXPORT(nsysnet_handle, inet_aton);
 
+    OS_FIND_EXPORT(nsysnet_handle, NSSLWrite);
+    OS_FIND_EXPORT(nsysnet_handle, NSSLRead);
+    OS_FIND_EXPORT(nsysnet_handle, NSSLCreateConnection);
+
     socket_lib_init();
 }
-

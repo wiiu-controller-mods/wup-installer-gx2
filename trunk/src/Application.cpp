@@ -34,6 +34,7 @@ Application::Application()
 	, bgMusic(NULL)
 	, video(NULL)
     , mainWindow(NULL)
+	, exitDisabled(false)
 {
     controller[0] = new VPadController(GuiTrigger::CHANNEL_1);
     controller[1] = new WPadController(GuiTrigger::CHANNEL_2);
@@ -161,10 +162,13 @@ void Application::executeThread(void)
         {
             if(controller[i]->update(video->getTvWidth(), video->getTvHeight()) == false)
                 continue;
-
+			
             if(controller[i]->data.buttons_d & VPAD_BUTTON_HOME)
-                exitApplication = true;
-
+			{
+				if(!exitDisabled)
+					exitApplication = true;
+			}
+			
             //! update controller states
             mainWindow->update(controller[i]);
         }

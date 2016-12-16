@@ -194,7 +194,7 @@ void MainWindow::SetupMainView()
 		messageBox->setState(GuiElement::STATE_DISABLED);
 		messageBox->setEffect(EFFECT_FADE, 10, 255);
 		messageBox->setTitle("Error:");
-		messageBox->setMessage("No instalable content found:");
+		messageBox->setMessage1("No instalable content found:");
 		messageBox->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
 		messageBox->messageOkClicked.connect(this, &MainWindow::OnErrorMessageBoxClick);
 		

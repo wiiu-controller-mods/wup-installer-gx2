@@ -34,7 +34,7 @@ InstallWindow::InstallWindow(CFolderList * list)
 		std::string message = fmt("%d application(s)", folderCount);
 		messageBox = new MessageBox(MessageBox::BT_YESNO, MessageBox::IT_ICONQUESTION, false);
 		messageBox->setTitle("Are you sure you want to install:");
-		messageBox->setMessage(message);
+		messageBox->setMessage1(message);
 		messageBox->messageYesClicked.connect(this, &InstallWindow::OnValidInstallClick);
 		messageBox->messageNoClicked.connect(this, &InstallWindow::OnCloseWindow);
 	}
@@ -42,7 +42,7 @@ InstallWindow::InstallWindow(CFolderList * list)
 	{
 		messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONEXCLAMATION, false);
 		messageBox->setTitle("No content selected.");
-		messageBox->setMessage("Return to folder browser.");
+		messageBox->setMessage1("Return to folder browser.");
 		messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 	}
 	
@@ -67,117 +67,95 @@ void InstallWindow::OnValidInstallClick(GuiElement * element, int val)
 {
 	messageBox->messageYesClicked.disconnect(this);
 	messageBox->messageNoClicked.disconnect(this);
-	messageBox->reload("Where do you want to install?", " ", MessageBox::BT_USB, MessageBox::IT_ICONQUESTION);
+	messageBox->reload("Where do you want to install?", "", "", MessageBox::BT_DEST, MessageBox::IT_ICONQUESTION);
 	messageBox->messageYesClicked.connect(this, &InstallWindow::OnDestinationChoice);
 	messageBox->messageNoClicked.connect(this, &InstallWindow::OnDestinationChoice);
 }
 
 void InstallWindow::OnDestinationChoice(GuiElement * element, int choice)
 {
-	//MessageBox::MR_YES //nand
-	//MessageBox::MR_NO //usb
+	if(choice == MessageBox::MR_YES)
+		target = NAND;
+	else
+		target = USB;
+	
+	Application::instance()->exitDisable();
 	
 	messageBox->messageYesClicked.disconnect(this);
 	messageBox->messageNoClicked.disconnect(this);
-	messageBox->reload("You choosed to install to:", choice == MessageBox::MR_YES ? "Internal Memory" : "USB", MessageBox::BT_OK, MessageBox::IT_ICONINFORMATION);
-	messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 	
-	///////////////////
+	startInstalling();
 }
 
 void InstallWindow::executeThread()
 {
-	/*MissingImagesCount = 0;
+	canceled = false;
 	
-	messageBox.setTitle(tr("Download 3D Covers"));
+	int total = folderList->GetSelectedCount();
+	int pos = 1;
 	
-	FindMissingImages();
-
-	if(MissingImagesCount == 0)
+	while(pos <= total && !canceled)
 	{
-	    log_printf("No images missing\n");
-        asyncLoadFinished(this, MissingImages.size());
-		return;
+		InstallProcess(pos, total);
+		
+		if(pos < total)
+		{
+			int time = 6;
+			u64 startTime = OSGetTime();
+			u32 passedMs = 0;
+			
+			while(time && !canceled)
+			{
+				passedMs = (OSGetTime() - startTime) * 4000ULL / BUS_SPEED;
+				
+				if(passedMs >= 1000)
+				{
+					time--;
+					startTime = OSGetTime();
+					messageBox->setMessage2(fmt("Starting next installation in %d second(s)", time));
+				}
+			}
+		}
+		
+		pos++;
 	}
-
-	u32 TotalDownloadCount = MissingImagesCount;
-
-	messageBox.setMessage(tr("Connecting.."));
 	
-	DownloadProcess(TotalDownloadCount);*/
-	
-	//////////////////////////////////
-	
-	//log_printf("OK!!\n");
-
-	OnCloseWindow(this, 0);
+	Application::instance()->exitEnable();
 }
 
-void InstallWindow::InstallProcess()
+void InstallWindow::InstallProcess(int pos, int total)
 {
-	/*for(u32 i = 0, pos = 1; i < MissingImages.size(); ++i, ++pos)
+	int index = folderList->GetFirstSelected();
+	
+	std::string title = fmt("Installing... (%d/%d)", pos, total);
+	std::string gameName = folderList->GetName(index);
+	
+	messageBox->reload(title, gameName, "", MessageBox::BT_NOBUTTON, MessageBox::IT_ICONINFORMATION, true, "0.0 %");
+	
+	/////////////////////////////
+	// install process
+	sleep(5);
+	
+	/////////////////////////////
+	
+	if(pos == total)
 	{
-		//if(ProgressCanceled())
-		//	break;
-
-        //snprintf(progressMsg, sizeof(progressMsg), "http://gametdb.com : %s.png", MissingImages[i].gameID.c_str());
-
-		//ShowProgress(MissingImages[i].progressTitle, fmt("%i %s", TotalDownloadCount - pos, tr( "files left" )), progressMsg, pos, TotalDownloadCount);
-		
-		char buffer[100];
-		snprintf(buffer,sizeof(buffer), "%d", TotalDownloadCount - pos);
-        
-		string progressMsg = "http://gametdb.com :";
-		progressMsg += " ";
-		progressMsg += MissingImages[i].gameID.c_str();
-		progressMsg += ".png";
-		progressMsg += " - ";
-		progressMsg += std::string(buffer);
-		progressMsg += " ";
-		progressMsg += tr("files left.");
-		
-		messageBox.setInfo(progressMsg.c_str());
-		
-		
-        messageBox.setProgress(100.0f * (f32)pos / (f32)TotalDownloadCount);
-
-        std::string imageData;
-
-		DownloadImage(MissingImages[i].downloadURL, MissingImages[i].gameID.c_str(), MissingImages[i].fileExt, imageData);
-		if(!imageData.size())
-		{
-			if(MissingImages[i].backupURL)
-			{
-				log_printf("Trying backup URL.\n");
-				MissingImages[i].downloadURL = MissingImages[i].backupURL;
-				MissingImages[i].backupURL = NULL;
-				--i;
-				--pos;
-			}
-			continue;
-		}
-
-		log_printf(" - OK\n");
-
-		std::string strOutpath;
-		strOutpath = MissingImages[i].writepath;
-		strOutpath += "/";
-		strOutpath += MissingImages[i].gameID;
-		strOutpath += MissingImages[i].fileExt;
-
-		CFile file(strOutpath, CFile::WriteOnly);
-		if(file.isOpen())
-        {
-			file.write((u8*)imageData.c_str(), imageData.size());
-            file.close();
-        }
-
-		//! Remove the image from the vector since it's done
-		MissingImages.erase(MissingImages.begin()+i);
-		--i;
+		messageBox->reload("Succesfully installed", gameName, "", MessageBox::BT_OK, MessageBox::IT_ICONTRUE);
+		messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 	}
+	else
+	{
+		messageBox->reload("Succesfully installed", gameName, "Starting next installation in 6 second(s)", MessageBox::BT_CANCEL, MessageBox::IT_ICONTRUE);
+		messageBox->messageCancelClicked.connect(this, &InstallWindow::OnInstallProcessCancel);
+	}
+	
+	folderList->UnSelect(index);
+}
 
-	return MissingImages.size();*/
+void InstallWindow::OnInstallProcessCancel(GuiElement *element, int val)
+{
+	canceled = true;
+	OnCloseWindow(this, 0);//////////////////////
 }
 
 void InstallWindow::OnCloseWindow(GuiElement * element, int val)

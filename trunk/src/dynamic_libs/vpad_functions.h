@@ -92,6 +92,7 @@ typedef struct
 
 void InitVPadFunctionPointers(void);
 
+extern void (* VPADInit)(void);
 extern void (* VPADRead)(int chan, VPADData *buffer, u32 buffer_size, s32 *error);
 
 #ifdef __cplusplus

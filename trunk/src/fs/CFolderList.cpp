@@ -96,6 +96,21 @@ void CFolderList::UnSelectAll()
 		Folders.at(i)->selected = false;
 }
 
+int CFolderList::GetFirstSelected()
+{
+	if(!Folders.size())
+		return -1;
+	
+	int found = -1;
+	for(u32 i = 0; i < Folders.size() && found < 0; i++)
+	{
+		if(Folders.at(i)->selected)
+			found = i;
+	}
+	
+	return found;
+}
+
 void CFolderList::Click(int ind)
 {
 	if(ind < 0 || ind >= (int) Folders.size())
