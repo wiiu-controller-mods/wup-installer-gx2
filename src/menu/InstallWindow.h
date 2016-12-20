@@ -3,6 +3,7 @@
 
 #include "fs/CFolderList.hpp"
 #include "gui/MessageBox.h"
+//#include "ProgressWindow.h"
 
 class MainWindow;
 
@@ -17,7 +18,6 @@ public:
         resumeThread();
     }
 
-    //sigslot::signal0<> updateFolderList;
     sigslot::signal1<GuiElement *> installWindowClosed;
 	
 private:
@@ -25,9 +25,15 @@ private:
     void OnDestinationChoice(GuiElement * element, int choice);
 	void OnCloseWindow(GuiElement * element, int val);
 	void OnWindowClosed(GuiElement * element);
+	void OnInstallProcessCancel(GuiElement *element, int val);
+	
+	//void showTvProgress();
+	//void hideTvProgress();
+	//void setTvProgressTitle(std::string title);
+	//void OnCloseTvProgressEffectFinish(GuiElement *element);
+	
 	void OnOpenEffectFinish(GuiElement *element);
 	void OnCloseEffectFinish(GuiElement *element);
-	void OnInstallProcessCancel(GuiElement *element, int val);
 	
 	void executeThread();
 	void InstallProcess(int pos, int total);
@@ -38,6 +44,7 @@ private:
     CFolderList * folderList;
 	
 	MessageBox * messageBox;
+	//ProgressWindow * progressWindow;
 	
 	MainWindow * mainWindow;
 	
