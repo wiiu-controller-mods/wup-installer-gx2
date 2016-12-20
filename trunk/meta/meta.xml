@@ -2,8 +2,8 @@
 <app version="1">
   <name>WUP Installer GX2</name>
   <coder>Dj_Skual</coder>
-  <version>v0.1 rev8</version>
-  <release_date>20161215193038</release_date>
+  <version>v0.1 rev9</version>
+  <release_date>20161220180001</release_date>
   <short_description>WiiU public title installer.</short_description> 
   <long_description>This application can install public titles such as game updates to your system memory (NAND) or the WiiU formatted USB.
 This application is based on "WUP Installer y Mod" by Yardape and the GUI on "Loadiine GX2" sources.
