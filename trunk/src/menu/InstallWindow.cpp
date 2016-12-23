@@ -189,7 +189,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 	/////////////////////////////
 	
 	int result = 0;
-	installCompleted = 1;
+	installCompleted = 0;
 	installError = 0;
 
 	//!---------------------------------------------------
@@ -220,15 +220,12 @@ void InstallWindow::InstallProcess(int pos, int total)
 			
 			std::string installFolder = folderList->GetPath(index);
 			installFolder.erase(0, 4);
-			installFolder.insert(0, "vol/app_sd/");
-			
-			log_printf("installFolder = %s\n", installFolder.c_str());
+			installFolder.insert(0, "/vol/app_sd/");
 			
 			int res = MCP_InstallGetInfo(mcpHandle, installFolder.c_str(), mcpInstallInfo);
 			if(res != 0)
 			{
 				//__os_snprintf(errorText1, sizeof(errorText1), "Error: MCP_InstallGetInfo 0x%08X", MCP_GetLastRawError());
-				//__os_snprintf(errorText2, sizeof(errorText2), "Confirm complete WUP files are in the folder. Try power down.");
 				messageBox->reload("Install failed", gameName, "Confirm complete WUP files are in the folder.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 				result = -3;
 				break;
@@ -252,25 +249,21 @@ void InstallWindow::InstallProcess(int pos, int total)
 			   || (titleIdHigh == 0x0005000C)     // DLC
 			   || (titleIdHigh == 0x00050002))    // Demo
 			{
-				//installedTitle = ((u64)titleIdHigh << 32ULL) | titleIdLow;
-				
 				res = MCP_InstallSetTargetDevice(mcpHandle, target);
 				if(res != 0)
 				{
-					//__os_snprintf(errorText1, sizeof(errorText1), "Error: MCP_InstallSetTargetDevice 0x%08X", MCP_GetLastRawError());
+					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetDevice 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					//if (installToUsb)
 					//	__os_snprintf(errorText2, sizeof(errorText2), "Possible USB HDD disconnected or failure");
-					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetDevice 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					result = -5;
 					break;
 				}
 				res = MCP_InstallSetTargetUsb(mcpHandle, target);
 				if(res != 0)
 				{
-					//__os_snprintf(errorText1, sizeof(errorText1), "Error: MCP_InstallSetTargetUsb 0x%08X", MCP_GetLastRawError());
+					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetUsb 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					//if (installToUsb)
 					//	__os_snprintf(errorText2, sizeof(errorText2), "Possible USB HDD disconnected or failure");
-					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetUsb 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 					result = -6;
 					break;
 				}
@@ -287,7 +280,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 				mcpPathInfoVector[0] = (unsigned int)mcpInstallPath;
 				mcpPathInfoVector[1] = (unsigned int)MAX_INSTALL_PATH_LENGTH;
 				
-				installCompleted = 0;
 				res = IOS_IoctlvAsync(mcpHandle, MCP_COMMAND_INSTALL_ASYNC, 1, 0, mcpPathInfoVector, (void*)IosInstallCallback, mcpInstallInfo);
 				if(res != 0)
 				{
@@ -300,7 +292,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 				{
 					memset(mcpInstallInfo, 0, 0x24);
 					
-					/*res = */MCP_InstallGetProgress(mcpHandle, mcpInstallInfo);
+					MCP_InstallGetProgress(mcpHandle, mcpInstallInfo);
 					
 					if(mcpInstallInfo[0] == 1)
 					{
@@ -308,8 +300,11 @@ void InstallWindow::InstallProcess(int pos, int total)
 						u64 installedSize = ((u64)mcpInstallInfo[5] << 32ULL) | mcpInstallInfo[6];
 						int percent = (totalSize != 0) ? ((installedSize * 100.0f) / totalSize) : 0;
 						
+						std::string message = fmt("%0.1f / %0.1f MB (%i", installedSize / (1024.0f * 1024.0f), totalSize / (1024.0f * 1024.0f), percent);
+						message += "%)";
+						
 						messageBox->setProgress(percent);
-						messageBox->setProgressBarInfo(fmt("%0.1f / %0.1f MB (%i%%)", installedSize / (1024.0f * 1024.0f), totalSize / (1024.0f * 1024.0f), percent));
+						messageBox->setProgressBarInfo(message);
 					}
 					
 					usleep(50000);
@@ -377,7 +372,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 	}
 	else
 	{
-		//messageBox->reload("Install failed", gameName, "", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 		messageBox->messageOkClicked.connect(this, &InstallWindow::OnCloseWindow);
 		
 		canceled = true;

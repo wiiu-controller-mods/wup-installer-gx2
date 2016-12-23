@@ -53,7 +53,7 @@ cat <<EOF > ./meta/meta.xml
   <version>v0.1 rev$rev_new</version>
   <release_date>$rev_date</release_date>
   <short_description>WiiU public title installer.</short_description> 
-  <long_description>This application can install public titles such as game updates to your system memory (NAND) or the WiiU formatted USB.
+  <long_description>This application can install public titles such as games, game updates or DLC to your system memory (NAND) or the WiiU formatted USB.
 This application is based on "WUP Installer y Mod" by Yardape and the GUI on "Loadiine GX2" sources.
 
 Thanks to:
