@@ -21,7 +21,7 @@ rev_new=`expr $rev_new + 1`
 if [ "$rev_new" != "$rev_old" ] || [ ! -f ./src/common/svnrev.c ]; then
 	
 	cat <<EOF > ./src/common/svnrev.c
-#include <stdlib.h>
+#include <stdlib.h> 
 
 #define SVN_REV "$rev_new"
 
