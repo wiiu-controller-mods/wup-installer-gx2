@@ -20,76 +20,74 @@
 #include "common/common.h"
 
 MainStartUp::MainStartUp(CVideo *Video)
-    : video(Video)
-    , particleBgImage(video->getTvWidth(), video->getTvHeight(), 50)
+	: video(Video)
 	, ImageData(Resources::GetImageData("splash.png"))
-    , Image(ImageData)
-
-{	
+	, Image(ImageData)
+{
 	versionText.setColor(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
-    versionText.setFontSize(26);
-    versionText.setAlignment(ALIGN_TOP | ALIGN_RIGHT);
-    versionText.setPosition(600, 312);
-    versionText.setTextf("%s (rev %s)",  WUP_GX2_VERSION, GetRev());
-    
-	msgText.setColor(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
-    msgText.setFontSize(36);
-	msgText.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
-	msgText.setMaxWidth(video->getTvHeight(), GuiText::DOTTED);
-    msgText.setPosition(0, - 324);
+	versionText.setFontSize(26);
+	versionText.setAlignment(ALIGN_TOP | ALIGN_RIGHT);
+	versionText.setPosition(600, 312);
+	versionText.setTextf("%s (rev %s)",  WUP_GX2_VERSION, GetRev());
 	
-	append(&particleBgImage);
+	msgText.setColor(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
+	msgText.setFontSize(36);
+	msgText.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
+	msgText.setMaxWidth(video->getTvWidth(), GuiText::DOTTED);
+	msgText.setPosition(0, - 324);
+	
 	append(&Image);	
 	append(&versionText);
 	append(&msgText);
 	
 	fadeIn();
-	
 }
 
 MainStartUp::~MainStartUp()
 {
-	
 	while(!elements.empty())
-    {
-        delete elements[0];
-        remove(elements[0]);
-    }
+	{
+		delete elements[0];
+		remove(elements[0]);
+	}
 	
 	Resources::RemoveImageData(ImageData);
+	
+	log_printf("MainStartUp deleted\n");
 }
 
 void MainStartUp::draw()
 {
-    //! start rendering Drc
+	//! start rendering Drc
 	video->prepareDrcRendering();
 	for(u32 i = 0; i < elements.size(); ++i)
-    {
-        elements[i]->draw(video);
-    }
+	{
+		elements[i]->draw(video);
+	}
 	video->drcDrawDone();
 	
 	//! start rendering Tv
 	video->prepareTvRendering();
 	for(u32 i = 0; i < elements.size(); ++i)
-    {
-        elements[i]->draw(video);
-    }
+	{
+		elements[i]->draw(video);
+	}
 	video->tvDrawDone();
 	
 	//! enable screen after first frame render
-	if(video->getFrameCount() == 0) {
-        video->tvEnable(true);
-        video->drcEnable(true);
+	if(video->getFrameCount() == 0)
+	{
+		video->tvEnable(true);
+		video->drcEnable(true);
 	}
-
+	
 	//! as last point update the effects as it can drop elements
 	video->waitForVSync();
-
-    //! transfer elements to real delete list here after all processes are finished
-    //! the elements are transfered to another list to delete the elements in a separate thread
-    //! and avoid blocking the GUI thread
-    AsyncDeleter::triggerDeleteProcess();	
+	
+	//! transfer elements to real delete list here after all processes are finished
+	//! the elements are transfered to another list to delete the elements in a separate thread
+	//! and avoid blocking the GUI thread
+	AsyncDeleter::triggerDeleteProcess();
 }
 
 void MainStartUp::textFade(int direction)
@@ -118,54 +116,53 @@ void MainStartUp::textFade(int direction)
 
 void MainStartUp::SetText(std::string msg)
 {
-    if(!msg.empty())
+	if(!msg.empty())
 	{
 		textFade(-50);
 		msgText.setTextf(msg.c_str());
 		textFade(50);
 	}
 	
-	msg.clear();	
+	msg.clear();
 }
 
 void MainStartUp::fadeIn()
 {
-    GuiImage fadeIn(video->getTvWidth(), video->getTvHeight(), (GX2Color){ 0, 0, 0, 255 });
-
+	GuiImage fadeIn(video->getTvWidth(), video->getTvHeight(), (GX2Color){ 0, 0, 0, 255 });
+	
 	for(int i = 255; i > 0; i -= 10)
-    {
-        if(i < 0)
-            i = 0;
-
-        fadeIn.setAlpha(i / 255.0f);
-
-	    video->prepareDrcRendering();
-	    
+	{
+		if(i < 0)
+			i = 0;
+		
+		fadeIn.setAlpha(i / 255.0f);
+		
+		video->prepareDrcRendering();
+		
 		for(u32 i = 0; i < elements.size(); ++i)
 		{
 			elements[i]->draw(video);
 		}
-
-        GX2SetDepthOnlyControl(GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_ALWAYS);
-        fadeIn.draw(video);
-        GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_LEQUAL);
-
-	    video->drcDrawDone();
-
-	    video->prepareTvRendering();
-
-	    for(u32 i = 0; i < elements.size(); ++i)
+		
+		GX2SetDepthOnlyControl(GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_ALWAYS);
+		fadeIn.draw(video);
+		GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_LEQUAL);
+		
+		video->drcDrawDone();
+		
+		video->prepareTvRendering();
+		
+		for(u32 i = 0; i < elements.size(); ++i)
 		{
 			elements[i]->draw(video);
 		}
-
-        GX2SetDepthOnlyControl(GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_ALWAYS);
-        fadeIn.draw(video);
-        GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_LEQUAL);
-
-	    video->tvDrawDone();
-
-	    video->waitForVSync();
-    }
-
+		
+		GX2SetDepthOnlyControl(GX2_DISABLE, GX2_DISABLE, GX2_COMPARE_ALWAYS);
+		fadeIn.draw(video);
+		GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_LEQUAL);
+		
+		video->tvDrawDone();
+		
+		video->waitForVSync();
+	}
 }

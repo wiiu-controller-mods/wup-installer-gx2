@@ -21,7 +21,7 @@ rev_new=`expr $rev_new + 1`
 if [ "$rev_new" != "$rev_old" ] || [ ! -f ./src/common/svnrev.c ]; then
 	
 	cat <<EOF > ./src/common/svnrev.c
-#include <stdlib.h> 
+#include <stdlib.h>
 
 #define SVN_REV "$rev_new"
 
@@ -54,7 +54,7 @@ cat <<EOF > ./meta/meta.xml
   <release_date>$rev_date</release_date>
   <short_description>WiiU public title installer.</short_description> 
   <long_description>This application can install public titles such as games, game updates or DLC to your system memory (NAND) or the WiiU formatted USB.
-This application is based on "WUP Installer y Mod" by Yardape and the GUI on "Loadiine GX2" sources.
+This application is based on "WUP Installer y Mod" by Yardape and the GUI from "Loadiine GX2" sources.
 
 Thanks to:
   Loadiine GX2 team for GUI sources.

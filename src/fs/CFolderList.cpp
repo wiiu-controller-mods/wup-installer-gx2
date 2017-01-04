@@ -27,6 +27,8 @@
  ***************************************************************************/
 #include "CFolderList.hpp"
 #include "DirList.h"
+#include "common/retain_vars.h"
+#include "dynamic_libs/os_functions.h"
 
 void CFolderList::AddFolder()
 {
@@ -121,9 +123,6 @@ void CFolderList::Click(int ind)
 
 void CFolderList::Reset()
 {
-	//for(u32 i = 0; i < Folders.size(); i++)
-		//delete Folders.at(i);
-
 	Folders.clear();
 }
 
@@ -172,4 +171,54 @@ int CFolderList::Get()
 	}
 	
 	return Folders.size();
+}
+
+int CFolderList::GetFromArray()
+{
+	Reset();
+	
+	u32 dir  = 0;
+	
+	for(dir = 0; dir < 1024; dir++)
+	{
+		std::string path = gFolderPath[dir];
+		
+		if(!path.size())
+			break;
+		else
+		{
+			std::string name = path;
+			name.erase(0, name.find_last_of("/")+1);
+			
+			AddFolder();
+			Folders.at(dir)->name = name;
+			Folders.at(dir)->path = path;
+			Folders.at(dir)->selected = true;
+		}
+	}
+	
+	return Folders.size();
+}
+
+void CFolderList::SetArray()
+{
+	u32 dir = 0;
+	u32 i = 0;
+	
+	for(dir = 0; dir < 1024; dir++)
+	{
+		__os_snprintf(gFolderPath[dir], 1, "\0");
+		
+		bool found = false;
+		while(i < Folders.size() && !found)
+		{
+			if(Folders.at(i)->selected == true)
+			{
+				__os_snprintf(gFolderPath[dir], Folders.at(i)->path.size()+1, Folders.at(i)->path.c_str());
+				found = true;
+			}
+			
+			i++;
+		}
+	}
 }
