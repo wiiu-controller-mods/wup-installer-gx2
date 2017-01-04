@@ -137,6 +137,7 @@ private:
 	void OnBrowserCloseEffectFinish(GuiElement *element);
 	void OnInstallWindowClosed(GuiElement *element);
 	void OnErrorMessageBoxClick(GuiElement *element, int ok);
+	void OnMiiMakerInstallWindowClosed(GuiElement *element);
     void OnOpenEffectFinish(GuiElement *element);
 	void OnCloseEffectFinish(GuiElement *element);
 	

@@ -62,6 +62,9 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 		folderButtons[i].folderButton = new GuiButton(folderButtons[i].folderButtonImg->getWidth(), folderButtons[i].folderButtonImg->getHeight());
 		folderButtons[i].folderButtonText = new GuiText(folderList->GetName(i).c_str(), 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
 		
+		folderButtons[i].folderButtonText->setMaxWidth(folderButtons[i].folderButtonImg->getWidth() - 70, GuiText::DOTTED);
+		folderButtons[i].folderButtonText->setPosition(35, 0);
+		
 		folderButtons[i].folderButton->setImageSelectOver(folderButtons[i].folderButtonHighlightedImg);
 		folderButtons[i].folderButton->setLabel(folderButtons[i].folderButtonText);
 		folderButtons[i].folderButton->setSoundClick(buttonClickSound);

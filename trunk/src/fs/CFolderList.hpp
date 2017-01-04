@@ -35,10 +35,12 @@
 class CFolderList
 {
 	public:
-		CFolderList() { Get(); };
+		CFolderList() { };
 		~CFolderList() { Reset(); };
 		
 		int Get();
+		int GetFromArray();
+		void SetArray();
 		void Reset();
 		void AddFolder();
 		int GetCount() { return Folders.size(); };

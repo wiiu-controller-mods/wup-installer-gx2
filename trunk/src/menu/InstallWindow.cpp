@@ -19,9 +19,8 @@
 #include "InstallWindow.h"
 #include "MainWindow.h"
 #include "utils/StringTools.h"
-//#include "fs/install.h"
-//#include "dynamic_libs/os_functions.h"
-//#include "utils/logger.h"
+#include "common/retain_vars.h"
+#include "common/common.h"
 
 #define MCP_COMMAND_INSTALL_ASYNC   0x81
 #define MAX_INSTALL_PATH_LENGTH     0x27F
@@ -31,9 +30,9 @@ static u32 installError = 0;
 
 static int IosInstallCallback(unsigned int errorCode, unsigned int * priv_data)
 {
-    installError = errorCode;
-    installCompleted = 1;
-    return 0;
+	installError = errorCode;
+	installCompleted = 1;
+	return 0;
 }
 
 InstallWindow::InstallWindow(CFolderList * list)
@@ -45,7 +44,13 @@ InstallWindow::InstallWindow(CFolderList * list)
 	
 	folderCount = folderList->GetSelectedCount();
 	
-	if(folderCount > 0)
+	if(gInstallMiimakerAsked)
+	{
+		target = gTarget;
+		
+		messageBox = new MessageBox(MessageBox::BT_NOBUTTON, MessageBox::IT_ICONINFORMATION, false);
+	}
+	else if(folderCount > 0)
 	{
 		std::string message = fmt("%d application(s)", folderCount);
 		messageBox = new MessageBox(MessageBox::BT_YESNO, MessageBox::IT_ICONQUESTION, false);
@@ -103,10 +108,19 @@ void InstallWindow::OnDestinationChoice(GuiElement * element, int choice)
 	else
 		target = USB;
 	
-	Application::instance()->exitDisable();
-	
 	messageBox->messageYesClicked.disconnect(this);
 	messageBox->messageNoClicked.disconnect(this);
+	
+	if(gMode == WUP_MODE_MII_MAKER)
+	{
+		folderList->SetArray();
+		
+		gInstallMiimakerAsked = true;
+		gTarget = target;
+		OnCloseWindow(this, 0);
+		
+		return;
+	}
 	
 	startInstalling();
 }
@@ -133,11 +147,12 @@ void InstallWindow::OnDestinationChoice(GuiElement * element, int choice)
 /*void InstallWindow::OnCloseTvProgressEffectFinish(GuiElement * element)
 {
 	progressWindow->effectFinished.disconnect(this);
-    tvFrame->remove(progressWindow);
+	tvFrame->remove(progressWindow);
 }*/
 
 void InstallWindow::executeThread()
 {
+	Application::instance()->exitDisable();
 	canceled = false;
 	
 	int total = folderList->GetSelectedCount();
@@ -164,6 +179,8 @@ void InstallWindow::executeThread()
 					messageBox->setMessage2(fmt("Starting next installation in %d second(s)", time));
 				}
 			}
+			
+			messageBox->messageCancelClicked.disconnect(this);
 		}
 		
 		pos++;
@@ -191,18 +208,18 @@ void InstallWindow::InstallProcess(int pos, int total)
 	int result = 0;
 	installCompleted = 0;
 	installError = 0;
-
+	
 	//!---------------------------------------------------
-    //! This part of code originates from Crediars MCP patcher assembly code
-    //! it is just translated to C
-    //!---------------------------------------------------
-    unsigned int mcpHandle = MCP_Open();
-    if(mcpHandle == 0)
-    {
-        messageBox->reload("Install failed", gameName, "Failed to open MCP.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+	//! This part of code originates from Crediars MCP patcher assembly code
+	//! it is just translated to C
+	//!---------------------------------------------------
+	unsigned int mcpHandle = MCP_Open();
+	if(mcpHandle == 0)
+	{
+		messageBox->reload("Install failed", gameName, "Failed to open MCP.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 		
-        result = -1;
-    }
+		result = -1;
+	}
 	else
 	{
 		unsigned int * mcpInstallInfo = (unsigned int *)OSAllocFromSystem(0x24, 0x40);
@@ -342,7 +359,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 			}
 		}
 		while(0);
-
+		
 		MCP_Close(mcpHandle);
 		if(mcpPathInfoVector)
 			OSFreeToSystem(mcpPathInfoVector);
@@ -389,25 +406,31 @@ void InstallWindow::OnInstallProcessCancel(GuiElement *element, int val)
 void InstallWindow::OnCloseWindow(GuiElement * element, int val)
 {
 	messageBox->setEffect(EFFECT_FADE, -10, 255);
-    messageBox->setState(GuiElement::STATE_DISABLED);
-    messageBox->effectFinished.connect(this, &InstallWindow::OnWindowClosed);
+	messageBox->setState(GuiElement::STATE_DISABLED);
+	messageBox->effectFinished.connect(this, &InstallWindow::OnWindowClosed);
 }
 
 void InstallWindow::OnWindowClosed(GuiElement *element)
 {
 	messageBox->effectFinished.disconnect(this);
 	installWindowClosed(this);
+	
 	AsyncDeleter::pushForDelete(this);
 }
 
 void InstallWindow::OnOpenEffectFinish(GuiElement *element)
 {
 	element->effectFinished.disconnect(this);
-    element->clearState(GuiElement::STATE_DISABLED);
+	element->clearState(GuiElement::STATE_DISABLED);
+	
+	if(gInstallMiimakerAsked)
+	{
+		startInstalling();
+	}
 }
 
 void InstallWindow::OnCloseEffectFinish(GuiElement *element)
 {
 	remove(element);
-    AsyncDeleter::pushForDelete(element);
+	AsyncDeleter::pushForDelete(element);
 }
