@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dynamic_libs/gx2_functions.h"
+#include "CVideo.h"
 #include "video/shaders/ColorShader.h"
 #include "CursorDrawer.h"
 
@@ -47,7 +47,7 @@ void CursorDrawer::init_colorVtxs(){
     }
     memset(this->colorVtxs,0xFF,16*sizeof(u8));
 
-    GX2Invalidate(GX2_INVALIDATE_CPU_ATTRIB_BUFFER, this->colorVtxs, 16 * sizeof(u8));
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, this->colorVtxs, 16 * sizeof(u8));
 }
 
 // Could be improved. It be more generic.
@@ -76,5 +76,5 @@ void CursorDrawer::draw_Cursor(f32 x,f32 y)
     ColorShader::instance()->setOffset(positionOffsets);
     ColorShader::instance()->setScale(scale);
     ColorShader::instance()->setColorIntensity(glm::vec4(1.0f));
-    ColorShader::instance()->draw(GX2_PRIMITIVE_QUADS, 4);
+    ColorShader::instance()->draw(GX2_PRIMITIVE_MODE_QUADS, 4);
 }

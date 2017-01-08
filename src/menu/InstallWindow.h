@@ -3,7 +3,7 @@
 
 #include "fs/CFolderList.hpp"
 #include "gui/MessageBox.h"
-//#include "ProgressWindow.h"
+#include "ProgressWindow.h"
 
 class MainWindow;
 
@@ -50,7 +50,6 @@ private:
 	
 	int folderCount;
 	bool canceled;
-	//bool timer;
 	int target;
 	
 	enum

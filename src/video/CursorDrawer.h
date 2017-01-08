@@ -20,10 +20,8 @@
 #include <string>
 
 #include <stdio.h>
-#include <gctypes.h>
-#include <gctypes.h>
 
-#include "dynamic_libs/gx2_types.h"
+#include "common/gx2_ext.h"
 
 class CursorDrawer
 {

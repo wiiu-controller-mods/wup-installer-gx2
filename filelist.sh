@@ -10,7 +10,7 @@ count=0
 if [[ $OSTYPE == darwin* ]];
 then
 
-for i in $(gfind ./data/images/ ./data/sounds/ ./data/fonts/ -maxdepth 1 -type f  \( ! -printf "%f\n" \) | sort -f)
+for i in $(gfind ./channel/content -maxdepth 1 -type f  \( ! -printf "%f\n" \) | sort -f)
 do
 	files[count]=$i
 	count=$((count+1))
@@ -18,7 +18,7 @@ done
 
 else
 
-for i in $(find ./data/images/ ./data/sounds/ ./data/fonts/ -maxdepth 1 -type f  \( ! -printf "%f\n" \) | sort -f)
+for i in $(find ./channel/content -maxdepth 1 -type f  \( ! -printf "%f\n" \) | sort -f)
 do
 	files[count]=$i
 	count=$((count+1))
@@ -42,27 +42,16 @@ cat <<EOF > $outFile
 #ifndef _FILELIST_H_
 #define _FILELIST_H_
 
-#include <gctypes.h>
-
 typedef struct _RecourceFile
 {
-	const char *filename;
-	const u8   *DefaultFile;
-	const u32  &DefaultFileSize;
-	u8		   *CustomFile;
-	u32		    CustomFileSize;
+	const char          *filename;
+	const unsigned char *DefaultFile;
+	const unsigned int  &DefaultFileSize;
+	unsigned char	    *CustomFile;
+	unsigned int        CustomFileSize;
 } RecourceFile;
 
 EOF
-
-for i in ${files[@]}
-do
-	filename=${i%.*}
-	extension=${i##*.}
-	echo 'extern const u8 '$filename'_'$extension'[];' >> $outFile
-	echo 'extern const u32 '$filename'_'$extension'_size;' >> $outFile
-	echo '' >> $outFile
-done
 
 echo 'static RecourceFile RecourceList[] =' >> $outFile
 echo '{' >> $outFile
@@ -71,7 +60,7 @@ for i in ${files[@]}
 do
 	filename=${i%.*}
 	extension=${i##*.}
-	echo -e '\t{"'$i'", '$filename'_'$extension', '$filename'_'$extension'_size, NULL, 0},' >> $outFile
+	echo -e '\t{"'$i'", NULL, 0, NULL, 0},' >> $outFile
 done
 
 echo -e '\t{NULL, NULL, 0, NULL, 0}' >> $outFile

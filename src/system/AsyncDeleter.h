@@ -24,41 +24,41 @@
 class AsyncDeleter : public CThread
 {
 public:
-	static void destroyInstance()
-	{
-		delete deleterInstance;
-		deleterInstance = NULL;
-	}
-	
-	class Element
-	{
-	public:
-		Element() {}
-		virtual ~Element() {}
-	};
-	
-	static void pushForDelete(AsyncDeleter::Element *e)
-	{
-		if(!deleterInstance)
-			deleterInstance = new AsyncDeleter;
-		
-		deleterInstance->deleteElements.push(e);
-	}
-	
-	static void triggerDeleteProcess(void);
-	
+    static void destroyInstance()
+    {
+        delete deleterInstance;
+        deleterInstance = NULL;
+    }
+
+    class Element
+    {
+    public:
+        Element() {}
+        virtual ~Element() {}
+    };
+
+    static void pushForDelete(AsyncDeleter::Element *e)
+    {
+        if(!deleterInstance)
+            deleterInstance = new AsyncDeleter;
+
+        deleterInstance->deleteElements.push(e);
+    }
+
+    static void triggerDeleteProcess(void);
+
 private:
-	AsyncDeleter();
-	virtual ~AsyncDeleter();
-	
-	static AsyncDeleter *deleterInstance;
-	
-	void executeThread(void);
-	
-	bool exitApplication;
-	std::queue<AsyncDeleter::Element *> deleteElements;
-	std::queue<AsyncDeleter::Element *> realDeleteElements;
-	CMutex deleteMutex;
+    AsyncDeleter();
+    virtual ~AsyncDeleter();
+
+    static AsyncDeleter *deleterInstance;
+
+    void executeThread(void);
+
+    bool exitApplication;
+    std::queue<AsyncDeleter::Element *> deleteElements;
+    std::queue<AsyncDeleter::Element *> realDeleteElements;
+    CMutex deleteMutex;
 };
 
 #endif // _ASYNC_DELETER_H

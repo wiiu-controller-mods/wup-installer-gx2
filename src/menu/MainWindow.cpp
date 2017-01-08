@@ -17,7 +17,6 @@
 #include "MainWindow.h"
 #include "Application.h"
 #include "utils/StringTools.h"
-#include "common/retain_vars.h"
 #include "common/common.h"
 #include "common/svnrev.h"
 #include "gui/MessageBox.h"
@@ -185,12 +184,10 @@ void MainWindow::SetupMainView()
 	currentDrcFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
 	currentDrcFrame->append(&bgParticleImg);
 	
-	if(!gInstallMiimakerAsked)
-		SetBrowserWindow();
-	
+	SetBrowserWindow();
 	SetDrcHeader();
 	
-	if(!gInstallMiimakerAsked && (folderList == NULL))
+	if(folderList == NULL)
 	{
 		MessageBox * messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONERROR, false);
 		messageBox->setState(GuiElement::STATE_DISABLED);
@@ -274,26 +271,13 @@ void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
 }
 void MainWindow::OnInstallWindowClosed(GuiElement *element)
 {
-	if(!gInstallMiimakerAsked)
-	{
-		SetBrowserWindow();
-		currentDrcFrame->bringToFront(&headerFrame);
-	}
-	else
-	{
-		Application::instance()->quit();
-	}
+	SetBrowserWindow();
+	currentDrcFrame->bringToFront(&headerFrame);
 }
 
 void MainWindow::OnErrorMessageBoxClick(GuiElement *element, int ok)
 {
-	Application::instance()->quit();
-}
-
-void MainWindow::OnMiiMakerInstallWindowClosed(GuiElement *element)
-{
-	gInstallMiimakerFinished = true;
-	Application::instance()->quit();
+//	Application::instance()->quit(0);
 }
 
 void MainWindow::OnOpenEffectFinish(GuiElement *element)
@@ -301,15 +285,6 @@ void MainWindow::OnOpenEffectFinish(GuiElement *element)
 	//! once the menu is open reset its state and allow it to be "clicked/hold"
 	element->effectFinished.disconnect(this);
 	element->clearState(GuiElement::STATE_DISABLED);
-	
-	if(gInstallMiimakerAsked && folderList == NULL)
-	{
-		folderList = new CFolderList();
-		folderList->GetFromArray();
-		
-		installWindow = new InstallWindow(folderList);
-		installWindow->installWindowClosed.connect(this, &MainWindow::OnMiiMakerInstallWindowClosed);
-	}
 }
 
 void MainWindow::OnCloseEffectFinish(GuiElement *element)

@@ -117,7 +117,7 @@ void GuiImageAsync::guiImageAsyncThread(CThread *thread, void *arg)
                 int iResult = LoadFileToMem(pInUse->filename.c_str(), &buffer, &bufferSize);
                 if(iResult > 0)
                 {
-                    pInUse->imgData = new GuiImageData(buffer, bufferSize, GX2_TEX_CLAMP_MIRROR);
+                    pInUse->imgData = new GuiImageData(buffer, bufferSize, GX2_TEX_CLAMP_MODE_MIRROR);
 
                     //! free original image buffer which is converted to texture now and not needed anymore
                     free(buffer);

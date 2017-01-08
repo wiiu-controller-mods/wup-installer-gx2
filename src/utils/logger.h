@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #define DEBUG_LOGGER        1
-#define	WUP_LOGGER_IP		"192.168.1.14"
 
 #ifdef DEBUG_LOGGER
 void log_init(const char * ip);

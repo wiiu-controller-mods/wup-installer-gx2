@@ -42,26 +42,3 @@ EOF
 		echo "svnrev.c created at Rev $rev_new" >&2
 	fi
 fi
-
-rev_date=`date -u +%Y%m%d%H%M%S`
-	
-cat <<EOF > ./meta/meta.xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<app version="1">
-  <name>WUP Installer GX2</name>
-  <coder>Dj_Skual</coder>
-  <version>v0.1 rev$rev_new</version>
-  <release_date>$rev_date</release_date>
-  <short_description>WiiU public title installer.</short_description> 
-  <long_description>This application can install public titles such as games, game updates or DLC to your system memory (NAND) or the WiiU formatted USB.
-This application is based on "WUP Installer y Mod" by Yardape and the GUI from "Loadiine GX2" sources.
-
-Thanks to:
-  Loadiine GX2 team for GUI sources.
-  Yardape for installer sources.
-
-Links:
-  https://sourceforge.net/projects/wup-installer-gx2/
-  </long_description> 
-</app>
-EOF

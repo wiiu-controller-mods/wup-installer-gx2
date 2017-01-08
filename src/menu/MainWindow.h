@@ -24,7 +24,7 @@
 #include "BrowserWindow.h"
 #include "InstallWindow.h"
 #include "gui/GuiParticleImage.h"
-//#include "system/CMutex.h"
+#include "system/CMutex.h"
 
 class CVideo;
 
@@ -137,8 +137,7 @@ private:
 	void OnBrowserCloseEffectFinish(GuiElement *element);
 	void OnInstallWindowClosed(GuiElement *element);
 	void OnErrorMessageBoxClick(GuiElement *element, int ok);
-	void OnMiiMakerInstallWindowClosed(GuiElement *element);
-    void OnOpenEffectFinish(GuiElement *element);
+	void OnOpenEffectFinish(GuiElement *element);
 	void OnCloseEffectFinish(GuiElement *element);
 	
 	int width, height;
