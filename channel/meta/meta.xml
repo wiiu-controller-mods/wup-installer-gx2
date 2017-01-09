@@ -33,18 +33,18 @@
   <e_manual type="unsignedInt" length="4">0</e_manual>
   <e_manual_version type="unsignedInt" length="4">0</e_manual_version>
   <region type="hexBinary" length="4">FFFFFFFF</region>
-  <pc_cero type="unsignedInt" length="4">128</pc_cero>
-  <pc_esrb type="unsignedInt" length="4">128</pc_esrb>
-  <pc_bbfc type="unsignedInt" length="4">192</pc_bbfc>
+  <pc_cero type="unsignedInt" length="4">18</pc_cero>
+  <pc_esrb type="unsignedInt" length="4">18</pc_esrb>
+  <pc_bbfc type="unsignedInt" length="4">18</pc_bbfc>
   <pc_usk type="unsignedInt" length="4">18</pc_usk>
   <pc_pegi_gen type="unsignedInt" length="4">18</pc_pegi_gen>
-  <pc_pegi_fin type="unsignedInt" length="4">192</pc_pegi_fin>
+  <pc_pegi_fin type="unsignedInt" length="4">18</pc_pegi_fin>
   <pc_pegi_prt type="unsignedInt" length="4">18</pc_pegi_prt>
   <pc_pegi_bbfc type="unsignedInt" length="4">18</pc_pegi_bbfc>
   <pc_cob type="unsignedInt" length="4">18</pc_cob>
-  <pc_grb type="unsignedInt" length="4">128</pc_grb>
-  <pc_cgsrr type="unsignedInt" length="4">128</pc_cgsrr>
-  <pc_oflc type="unsignedInt" length="4">15</pc_oflc>
+  <pc_grb type="unsignedInt" length="4">18</pc_grb>
+  <pc_cgsrr type="unsignedInt" length="4">18</pc_cgsrr>
+  <pc_oflc type="unsignedInt" length="4">18</pc_oflc>
   <pc_reserved0 type="unsignedInt" length="4">192</pc_reserved0>
   <pc_reserved1 type="unsignedInt" length="4">192</pc_reserved1>
   <pc_reserved2 type="unsignedInt" length="4">192</pc_reserved2>

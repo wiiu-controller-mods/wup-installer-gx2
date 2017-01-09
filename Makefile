@@ -150,7 +150,6 @@ clean: clean_channel
 	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(OUTPUT).rpx \
 			$(CURDIR)/src/common/svnrev.c $(CURDIR)/src/resources/filelist.h
 
-
 #---------------------------------------------------------------------------------
 install_channel: $(BUILD) NUSPacker.jar encryptKeyWith
 	@cp $(OUTPUT).rpx channel/code/

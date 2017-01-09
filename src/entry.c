@@ -12,8 +12,8 @@ int main(int argc, char **argv)
 	//! do OS (for acquire) and sockets first so we got logging
 	InitOSFunctionPointers();
 	
-//	log_init(WUP_LOGGER_IP);
-//	log_print("Starting WUP Installer" WUP_GX2_VERSION "\n");
+	//log_init(WUP_LOGGER_IP);
+	//log_print("Starting WUP Installer GX2" WUP_GX2_VERSION "\n");
 	
 	//! *******************************************************************
 	//! *           Check from where our application is started           *

@@ -40,7 +40,6 @@ Application::Application()
 	, video(NULL)
 	, mainWindow(NULL)
     , fontSystem(NULL)
-	, exitDisabled(false)
 {
 	controller[0] = new VPadController(GuiTrigger::CHANNEL_1);
 	controller[1] = new WPadController(GuiTrigger::CHANNEL_2);
@@ -75,6 +74,8 @@ Application::~Application()
 	SoundHandler::DestroyInstance();
 	
 	CursorDrawer::destroyInstance();
+	
+	//ProcUIShutdown();
 }
 
 void Application::exec()
@@ -85,10 +86,9 @@ void Application::exec()
 	shutdownThread();
 }
 
-void Application::quit(int code)
+void Application::quit()
 {
-	//exitCode = code;
-    exitApplication = true;
+	exitApplication = true;
     quitRequest = true;
 }
 
@@ -149,7 +149,6 @@ bool Application::procUI(void)
 		case PROCUI_STATUS_EXITING:
 		{
 			log_printf("PROCUI_STATUS_EXITING\n");
-			//exitCode = EXIT_SUCCESS;
 			exitApplication = true;
 			break;
 		}
@@ -228,11 +227,8 @@ void Application::executeThread(void)
 	//! main GX2 loop (60 Hz cycle with max priority on core 1)
 	while(!exitApplication)
 	{
-	    if(!exitDisabled)
-		{
-			if(procUI() == false)
-				continue;
-		}
+	    if(procUI() == false)
+			continue;
 		
 		mainWindow->lockGUI();
 		//! Read out inputs
@@ -240,12 +236,6 @@ void Application::executeThread(void)
 		{
 			if(controller[i]->update(video->getTvWidth(), video->getTvHeight()) == false)
 				continue;
-			
-			/*if(controller[i]->data.buttons_d & VPAD_BUTTON_HOME)
-			{
-				if(!exitDisabled)
-					exitApplication = true;
-			}*/
 			
 			//! update controller states
 			mainWindow->update(controller[i]);
