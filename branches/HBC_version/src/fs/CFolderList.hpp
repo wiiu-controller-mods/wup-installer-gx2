@@ -35,7 +35,7 @@
 class CFolderList
 {
 	public:
-		CFolderList() { Get(); };
+		CFolderList() { };
 		~CFolderList() { Reset(); };
 		
 		int Get();

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define WUP_GX2_VERSION			"v0.1"
+#define WUP_GX2_VERSION			"v1.0"
 
 /* WUP Modes */
 #define WUP_MODE_MII_MAKER	0

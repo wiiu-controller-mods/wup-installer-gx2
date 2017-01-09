@@ -121,9 +121,6 @@ void CFolderList::Click(int ind)
 
 void CFolderList::Reset()
 {
-	//for(u32 i = 0; i < Folders.size(); i++)
-		//delete Folders.at(i);
-
 	Folders.clear();
 }
 

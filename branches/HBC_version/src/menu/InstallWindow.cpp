@@ -19,9 +19,7 @@
 #include "InstallWindow.h"
 #include "MainWindow.h"
 #include "utils/StringTools.h"
-//#include "fs/install.h"
-//#include "dynamic_libs/os_functions.h"
-//#include "utils/logger.h"
+#include "common/common.h"
 
 #define MCP_COMMAND_INSTALL_ASYNC   0x81
 #define MAX_INSTALL_PATH_LENGTH     0x27F
@@ -31,9 +29,9 @@ static u32 installError = 0;
 
 static int IosInstallCallback(unsigned int errorCode, unsigned int * priv_data)
 {
-    installError = errorCode;
-    installCompleted = 1;
-    return 0;
+	installError = errorCode;
+	installCompleted = 1;
+	return 0;
 }
 
 InstallWindow::InstallWindow(CFolderList * list)
@@ -68,23 +66,23 @@ InstallWindow::InstallWindow(CFolderList * list)
 	drcFrame->effectFinished.connect(this, &InstallWindow::OnOpenEffectFinish);
 	drcFrame->append(messageBox);
 	
-	//progressWindow = new ProgressWindow("title");
-	//tvFrame = new GuiFrame(0, 0);
-	//tvFrame->setPosition(0, -250);
+	progressWindow = new ProgressWindow("title");
+	tvFrame = new GuiFrame(0, 0);
+	tvFrame->setPosition(0, -250);
 	
 	mainWindow->appendDrc(drcFrame);
-	//mainWindow->appendTv(tvFrame);
+	mainWindow->appendTv(tvFrame);
 }
 
 InstallWindow::~InstallWindow()
 {
 	drcFrame->remove(messageBox);
 	mainWindow->remove(drcFrame);
-	//mainWindow->remove(tvFrame);
+	mainWindow->remove(tvFrame);
 	delete drcFrame;
-	//delete tvFrame;
+	delete tvFrame;
 	delete messageBox;
-	//delete progressWindow;
+	delete progressWindow;
 }
 
 void InstallWindow::OnValidInstallClick(GuiElement * element, int val)
@@ -103,41 +101,40 @@ void InstallWindow::OnDestinationChoice(GuiElement * element, int choice)
 	else
 		target = USB;
 	
-	Application::instance()->exitDisable();
-	
 	messageBox->messageYesClicked.disconnect(this);
 	messageBox->messageNoClicked.disconnect(this);
 	
 	startInstalling();
 }
 
-/*void InstallWindow::showTvProgress()
+void InstallWindow::showTvProgress()
 {
 	progressWindow->setEffect(EFFECT_FADE, 10, 255);
 	progressWindow->effectFinished.connect(this, &InstallWindow::OnOpenEffectFinish);
 	
 	tvFrame->append(progressWindow);
-}*/
+}
 
-/*void InstallWindow::hideTvProgress()
+void InstallWindow::hideTvProgress()
 {
 	progressWindow->setEffect(EFFECT_FADE, -10, 255);
 	progressWindow->effectFinished.connect(this, &InstallWindow::OnCloseTvProgressEffectFinish);
-}*/
+}
 
-/*void InstallWindow::setTvProgressTitle(std::string title)
+void InstallWindow::setTvProgressTitle(std::string title)
 {
 	progressWindow->setTitle(title);
-}*/
+}
 
-/*void InstallWindow::OnCloseTvProgressEffectFinish(GuiElement * element)
+void InstallWindow::OnCloseTvProgressEffectFinish(GuiElement * element)
 {
 	progressWindow->effectFinished.disconnect(this);
-    tvFrame->remove(progressWindow);
-}*/
+	tvFrame->remove(progressWindow);
+}
 
 void InstallWindow::executeThread()
 {
+	Application::instance()->exitDisable();
 	canceled = false;
 	
 	int total = folderList->GetSelectedCount();
@@ -164,6 +161,8 @@ void InstallWindow::executeThread()
 					messageBox->setMessage2(fmt("Starting next installation in %d second(s)", time));
 				}
 			}
+			
+			messageBox->messageCancelClicked.disconnect(this);
 		}
 		
 		pos++;
@@ -181,8 +180,8 @@ void InstallWindow::InstallProcess(int pos, int total)
 	
 	messageBox->reload(title, gameName, "", MessageBox::BT_NOBUTTON, MessageBox::IT_ICONINFORMATION, true, "0.0 %");
 	
-	//setTvProgressTitle(fmt("Installing %s", gameName.c_str()));
-	//showTvProgress();
+	setTvProgressTitle(fmt("Installing %s", gameName.c_str()));
+	showTvProgress();
 	
 	/////////////////////////////
 	// install process
@@ -191,18 +190,18 @@ void InstallWindow::InstallProcess(int pos, int total)
 	int result = 0;
 	installCompleted = 0;
 	installError = 0;
-
+	
 	//!---------------------------------------------------
-    //! This part of code originates from Crediars MCP patcher assembly code
-    //! it is just translated to C
-    //!---------------------------------------------------
-    unsigned int mcpHandle = MCP_Open();
-    if(mcpHandle == 0)
-    {
-        messageBox->reload("Install failed", gameName, "Failed to open MCP.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+	//! This part of code originates from Crediars MCP patcher assembly code
+	//! it is just translated to C
+	//!---------------------------------------------------
+	unsigned int mcpHandle = MCP_Open();
+	if(mcpHandle == 0)
+	{
+		messageBox->reload("Install failed", gameName, "Failed to open MCP.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 		
-        result = -1;
-    }
+		result = -1;
+	}
 	else
 	{
 		unsigned int * mcpInstallInfo = (unsigned int *)OSAllocFromSystem(0x24, 0x40);
@@ -305,6 +304,9 @@ void InstallWindow::InstallProcess(int pos, int total)
 						
 						messageBox->setProgress(percent);
 						messageBox->setProgressBarInfo(message);
+						
+						progressWindow->setProgress(percent);
+						progressWindow->setInfo(message);
 					}
 					
 					usleep(50000);
@@ -342,7 +344,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 			}
 		}
 		while(0);
-
+		
 		MCP_Close(mcpHandle);
 		if(mcpPathInfoVector)
 			OSFreeToSystem(mcpPathInfoVector);
@@ -353,7 +355,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 	}
 	/////////////////////////////
 	
-	//hideTvProgress();
+	hideTvProgress();
 	
 	if(result >= 0)
 	{
@@ -389,25 +391,26 @@ void InstallWindow::OnInstallProcessCancel(GuiElement *element, int val)
 void InstallWindow::OnCloseWindow(GuiElement * element, int val)
 {
 	messageBox->setEffect(EFFECT_FADE, -10, 255);
-    messageBox->setState(GuiElement::STATE_DISABLED);
-    messageBox->effectFinished.connect(this, &InstallWindow::OnWindowClosed);
+	messageBox->setState(GuiElement::STATE_DISABLED);
+	messageBox->effectFinished.connect(this, &InstallWindow::OnWindowClosed);
 }
 
 void InstallWindow::OnWindowClosed(GuiElement *element)
 {
 	messageBox->effectFinished.disconnect(this);
 	installWindowClosed(this);
+	
 	AsyncDeleter::pushForDelete(this);
 }
 
 void InstallWindow::OnOpenEffectFinish(GuiElement *element)
 {
 	element->effectFinished.disconnect(this);
-    element->clearState(GuiElement::STATE_DISABLED);
+	element->clearState(GuiElement::STATE_DISABLED);
 }
 
 void InstallWindow::OnCloseEffectFinish(GuiElement *element)
 {
 	remove(element);
-    AsyncDeleter::pushForDelete(element);
+	AsyncDeleter::pushForDelete(element);
 }

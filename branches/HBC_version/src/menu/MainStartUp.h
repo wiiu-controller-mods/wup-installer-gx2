@@ -19,56 +19,53 @@
 
 #include <vector>
 #include "gui/Gui.h"
-#include "gui/GuiParticleImage.h"
 
 class CVideo;
 
 class MainStartUp
 {
 public:
-    MainStartUp(CVideo *Video);
-    virtual ~MainStartUp();
-
+	MainStartUp(CVideo *Video);
+	virtual ~MainStartUp();
+	
 	void SetText(std::string msg);
 	
 private:
-
-    void append(GuiElement *e)
-    {
-        if(!e)
-            return;
-
-        remove(e);
-        elements.push_back(e);
-    }
-    
-    void remove(GuiElement *e)
-    {
-        for(u32 i = 0; i < elements.size(); ++i)
-        {
-            if(e == elements[i])
-            {
-                elements.erase(elements.begin() + i);
-                break;
-            }
-        }
-    }
+	
+	void append(GuiElement *e)
+	{
+		if(!e)
+			return;
+		
+		remove(e);
+		elements.push_back(e);
+	}
+	
+	void remove(GuiElement *e)
+	{
+		for(u32 i = 0; i < elements.size(); ++i)
+		{
+			if(e == elements[i])
+			{
+				elements.erase(elements.begin() + i);
+				break;
+			}
+		}
+	}
 	
 	void draw();
-
+	
 	void textFade(int direction);
 	void fadeIn(void);
 	
-    int width, height;
-    std::vector<GuiElement *> elements;
+	int width, height;
+	std::vector<GuiElement *> elements;
 	
 	CVideo *video;
-    GuiParticleImage particleBgImage;
 	GuiImageData *ImageData;
-    GuiImage Image;
+	GuiImage Image;
 	GuiText versionText;
 	GuiText msgText;
-
 };
 
 #endif //_MAIN_STARTUP_H_

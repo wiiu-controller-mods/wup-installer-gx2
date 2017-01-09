@@ -46,9 +46,6 @@ public:
 	MainWindow *getMainWindow(void) const {
 		return mainWindow;
 	}
-	/*MainStartUp *getMainStartUp(void) const {
-		return mainStartUp;
-	}*/
 	GuiSound *getBgMusic(void) const {
 		return bgMusic;
 	}
@@ -56,16 +53,8 @@ public:
 	void exec(void);
 	void fadeOut(void);
 	
-    void quit(int code);
+    void quit(void);
 	
-	void exitDisable() {
-		exitDisabled = true;
-	}
-	
-	void exitEnable() {
-		exitDisabled = false;
-	}
-
 private:
 	Application();
 	virtual ~Application();
@@ -83,8 +72,6 @@ private:
 	MainWindow *mainWindow;
     FreeTypeGX *fontSystem;
 	GuiController *controller[5];
-	
-	bool exitDisabled;
 };
 
 #endif //_APPLICATION_H

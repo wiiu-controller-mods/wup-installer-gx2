@@ -26,35 +26,37 @@
 class Application : public CThread
 {
 public:
-    static Application * instance() {
-        if(!applicationInstance)
-            applicationInstance = new Application();
-        return applicationInstance;
-    }
-    static void destroyInstance() {
-        if(applicationInstance) {
-            delete applicationInstance;
-            applicationInstance = NULL;
-        }
-    }
-
-    CVideo *getVideo(void) const {
-        return video;
-    }
-    MainWindow *getMainWindow(void) const {
-        return mainWindow;
-    }
-
-    GuiSound *getBgMusic(void) const {
-        return bgMusic;
-    }
-
-    void exec(void);
-    void fadeOut(void);
-
-    void quit(void) {
-        exitApplication = true;
-    }
+	static Application * instance() {
+		if(!applicationInstance)
+			applicationInstance = new Application();
+		return applicationInstance;
+	}
+	static void destroyInstance() {
+		if(applicationInstance) {
+			delete applicationInstance;
+			applicationInstance = NULL;
+		}
+	}
+	
+	CVideo *getVideo(void) const {
+		return video;
+	}
+	MainWindow *getMainWindow(void) const {
+		return mainWindow;
+	}
+	/*MainStartUp *getMainStartUp(void) const {
+		return mainStartUp;
+	}*/
+	GuiSound *getBgMusic(void) const {
+		return bgMusic;
+	}
+	
+	void exec(void);
+	void fadeOut(void);
+	
+	void quit(void) {
+		exitApplication = true;
+	}
 	
 	void exitDisable() {
 		exitDisabled = true;
@@ -65,19 +67,19 @@ public:
 	}
 
 private:
-    Application();
-    virtual ~Application();
-
-    static Application *applicationInstance;
-    static bool exitApplication;
-
-    void executeThread(void);
-
-    GuiSound *bgMusic;
-    CVideo *video;
-    MainWindow *mainWindow;
+	Application();
+	virtual ~Application();
+	
+	static Application *applicationInstance;
+	static bool exitApplication;
+	
+	void executeThread(void);
+	
+	GuiSound *bgMusic;
+	CVideo *video;
+	MainWindow *mainWindow;
 	MainStartUp *mainStartUp;
-    GuiController *controller[5];
+	GuiController *controller[5];
 	
 	bool exitDisabled;
 };

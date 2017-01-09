@@ -277,7 +277,7 @@ void MainWindow::OnInstallWindowClosed(GuiElement *element)
 
 void MainWindow::OnErrorMessageBoxClick(GuiElement *element, int ok)
 {
-//	Application::instance()->quit(0);
+	Application::instance()->quit();
 }
 
 void MainWindow::OnOpenEffectFinish(GuiElement *element)

@@ -27,10 +27,10 @@ private:
 	void OnWindowClosed(GuiElement * element);
 	void OnInstallProcessCancel(GuiElement *element, int val);
 	
-	//void showTvProgress();
-	//void hideTvProgress();
-	//void setTvProgressTitle(std::string title);
-	//void OnCloseTvProgressEffectFinish(GuiElement *element);
+	void showTvProgress();
+	void hideTvProgress();
+	void setTvProgressTitle(std::string title);
+	void OnCloseTvProgressEffectFinish(GuiElement *element);
 	
 	void OnOpenEffectFinish(GuiElement *element);
 	void OnCloseEffectFinish(GuiElement *element);
@@ -39,12 +39,12 @@ private:
 	void InstallProcess(int pos, int total);
 	
 	GuiFrame * drcFrame;
-	//GuiFrame * tvFrame;
+	GuiFrame * tvFrame;
 	
 	CFolderList * folderList;
 	
 	MessageBox * messageBox;
-	//ProgressWindow * progressWindow;
+	ProgressWindow * progressWindow;
 	
 	MainWindow * mainWindow;
 	
