@@ -5,14 +5,11 @@
 extern "C" {
 #endif
 
-#include "os_defs.h"
-
-#define WUP_GX2_VERSION			"v1.1"
+#define WUP_GX2_VERSION			"v1.0"
 
 /* WUP Modes */
 #define WUP_MODE_MII_MAKER	0
 #define WUP_MODE_HBC		1
-#define WUP_MODE_CHANNEL	2
 
 /* homebrew launcher return codes */
 #ifndef EXIT_SUCCESS

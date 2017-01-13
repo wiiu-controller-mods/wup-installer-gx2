@@ -9,9 +9,6 @@ endif
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
-ifeq ($(strip $(WUT_ROOT)),)
-$(error "Please ensure WUT_ROOT is in your environment.")
-endif
 export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
 export LIBOGC_INC	:=	$(DEVKITPRO)/libogc/include
 export LIBOGC_LIB	:=	$(DEVKITPRO)/libogc/lib/wii
@@ -24,8 +21,6 @@ export CC	:=	$(PREFIX)gcc
 export CXX	:=	$(PREFIX)g++
 export AR	:=	$(PREFIX)ar
 export OBJCOPY	:=	$(PREFIX)objcopy
-
-export ELF2RPL	:= $(WUT_ROOT)/bin/elf2rpl
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -63,10 +58,7 @@ CFLAGS	:=  -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
 CXXFLAGS := -std=gnu++11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
 		    -O3 -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing $(INCLUDE)
 ASFLAGS	:= -mregnames
-LDFLAGS	:= -nostartfiles -T $(WUT_ROOT)/rules/rpl.ld -pie -fPIE -z common-page-size=64 -z max-page-size=64 -lcrt \
-			-Wl,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size \
-			-Wl,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r \
-			-Wl,-wrap,valloc,-wrap,_valloc_r,-wrap,_pvalloc_r,-wrap,__eabi -Wl,--gc-sections
+LDFLAGS	:= -nostartfiles -Wl,-Map,$(notdir $@).map,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r,-wrap,valloc,-wrap,_valloc_r,-wrap,_pvalloc_r,--gc-sections
 
 #---------------------------------------------------------------------------------
 Q := @
@@ -74,16 +66,16 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lcrt -lcoreinit -lproc_ui -lnsysnet -lsndcore2 -lvpad -lgx2 -lsysapp -lgd -lpng -ljpeg -lz -lfreetype -lmad -lvorbisidec
+LIBS	:= -lgcc -lgd -lpng -ljpeg -lz -lfreetype -lmad -lvorbisidec
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(CURDIR)	\
-			$(DEVKITPPC)/  \
-			$(DEVKITPPC)/lib/gcc/powerpc-eabi/4.8.2 \
-			$(WUT_ROOT)/lib
+			$(DEVKITPPC)/lib  \
+			$(DEVKITPPC)/lib/gcc/powerpc-eabi/4.8.2
+
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -100,17 +92,18 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 #---------------------------------------------------------------------------------
 # automatically build a list of object files for our project
 #---------------------------------------------------------------------------------
-FILELIST	:=	$(shell bash ./filelist.sh)
-SVNREV		:=	$(shell bash ./svnrev.sh)
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-sFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.S)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-TTFFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ttf)))
-PNGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
-OGGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ogg)))
-MP3FILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.mp3)))
+FILELIST		:=	$(shell bash ./filelist.sh)
+SVNREV			:=	$(shell bash ./svnrev.sh)
+export CFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+export CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+export HFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.h)))
+sFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+SFILES			:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.S)))
+BINFILES		:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+TTFFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ttf)))
+PNGFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
+OGGFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ogg)))
+MP3FILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.mp3)))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -131,16 +124,17 @@ export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 # build a list of include paths
 #---------------------------------------------------------------------------------
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					-I$(CURDIR)/$(BUILD) -I$(WUT_ROOT)/include \
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD) -I$(LIBOGC_INC) \
 					-I$(PORTLIBS)/include -I$(PORTLIBS)/include/freetype2
 
 #---------------------------------------------------------------------------------
 # build a list of library paths
 #---------------------------------------------------------------------------------
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)) \
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
 					-L$(LIBOGC_LIB) -L$(PORTLIBS)/lib
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT		:=	$(CURDIR)/$(TARGET)
 .PHONY: $(BUILD) clean install
 
 #---------------------------------------------------------------------------------
@@ -149,31 +143,14 @@ $(BUILD):
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
-clean: clean_channel
+clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(OUTPUT).rpx \
-			$(CURDIR)/src/common/svnrev.c $(CURDIR)/src/resources/filelist.h
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(CURDIR)/src/common/svnrev.c \
+			$(CURDIR)/meta/meta.xml $(CURDIR)/src/resources/filelist.h
 
 #---------------------------------------------------------------------------------
 run:
-	wiiload $(OUTPUT).rpx
-
-#---------------------------------------------------------------------------------
-install_channel: $(BUILD) NUSPacker.jar encryptKeyWith
-	@cp $(OUTPUT).rpx channel/code/
-	java -jar NUSPacker.jar -in "channel" -out "wupgx2_install_channel"
-
-NUSPacker.jar:
-	@echo "Missing NUSPacker.jar! Insert the \"NUSPacker.jar\" file in the WUP Installer GX2 Makefile path!"
-	@exit 1
-
-encryptKeyWith:
-	@echo "Missing common key file \"encryptKeyWith\"! Insert the common key as string into \"encryptKeyWith\" file in the WUP Installer GX2 Makefile path!"
-	@exit 1
-	
-clean_channel:
-	@rm -fr wupgx2_install_channel fst.bin output tmp channel/code/wup_installer_gx2.rpx
-
+	wiiload $(OUTPUT).elf
 #---------------------------------------------------------------------------------
 else
 
@@ -182,21 +159,20 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).rpx:	$(OUTPUT).elf
 $(OUTPUT).elf:  $(OFILES)
+
+#---------------------------------------------------------------------------------
+# Translation files
+#---------------------------------------------------------------------------------
+translations: $(wildcard $(PROJECTDIR)/languages/*.lang)
 
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .jpg extension
 #---------------------------------------------------------------------------------
-%.elf: $(OFILES)
+%.elf: link.ld $(OFILES)
 	@echo "linking ... $(TARGET).elf"
-	$(Q)$(LD) $^ $(LDFLAGS) -o $@ $(LIBPATHS) $(LIBS)
-
-#---------------------------------------------------------------------------------
-%.rpx: %.elf
-#---------------------------------------------------------------------------------
-	@echo "[RPX] $(notdir $@)"
-	@$(ELF2RPL) $^ $@
+	$(Q)$(LD) -n -T $^ $(LDFLAGS) -o ../$(BUILD_DBG).elf  $(LIBPATHS) $(LIBS)
+	$(Q)$(OBJCOPY) -S -R .comment -R .gnu.attributes ../$(BUILD_DBG).elf $@
 
 #---------------------------------------------------------------------------------
 %.a:
@@ -256,9 +232,6 @@ $(OUTPUT).elf:  $(OFILES)
 	@bin2s -a 32 $< | $(AS) -o $(@)
 
 #---------------------------------------------------------------------------------
-%.dsp.o : %.dsp
-	@echo $(notdir $<)
-	@bin2s -a 32 $< | $(AS) -o $(@)
 
 -include $(DEPENDS)
 

@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
+#include <gctypes.h>
 #include <malloc.h>
 #include <string.h>
 #include <unistd.h>
-#include <coreinit/cache.h>
-#include "SoundDecoder.hpp"
 #include "dynamic_libs/os_functions.h"
+#include "SoundDecoder.hpp"
 
 static const u32 FixedPointShift = 15;
 static const u32 FixedPointScale = 1 << FixedPointShift;

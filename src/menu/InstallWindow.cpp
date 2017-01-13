@@ -21,9 +21,6 @@
 #include "utils/StringTools.h"
 #include "common/retain_vars.h"
 #include "common/common.h"
-#include "dynamic_libs/os_functions.h"
-#include <coreinit/mcp.h>
-#include <coreinit/memory.h>
 
 #define MCP_COMMAND_INSTALL_ASYNC   0x81
 #define MAX_INSTALL_PATH_LENGTH     0x27F
@@ -155,6 +152,7 @@ void InstallWindow::OnCloseTvProgressEffectFinish(GuiElement * element)
 
 void InstallWindow::executeThread()
 {
+	Application::instance()->exitDisable();
 	canceled = false;
 	
 	int total = folderList->GetSelectedCount();
@@ -187,6 +185,8 @@ void InstallWindow::executeThread()
 		
 		pos++;
 	}
+	
+	Application::instance()->exitEnable();
 }
 
 void InstallWindow::InstallProcess(int pos, int total)
@@ -222,7 +222,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 	}
 	else
 	{
-        char installPath[256];
 		unsigned int * mcpInstallInfo = (unsigned int *)OSAllocFromSystem(0x24, 0x40);
 		char * mcpInstallPath = (char *)OSAllocFromSystem(MAX_INSTALL_PATH_LENGTH, 0x40);
 		unsigned int * mcpPathInfoVector = (unsigned int *)OSAllocFromSystem(0x0C, 0x40);
@@ -237,16 +236,14 @@ void InstallWindow::InstallProcess(int pos, int total)
 			}
 			
 			std::string installFolder = folderList->GetPath(index);
-			installFolder.erase(0, 19);
+			installFolder.erase(0, 4);
 			installFolder.insert(0, "/vol/app_sd/");
-            
-            snprintf(installPath, sizeof(installPath), "%s", installFolder.c_str());
 			
-			int res = MCP_InstallGetInfo(mcpHandle, installPath, (MCPInstallInfo*)mcpInstallInfo);
+			int res = MCP_InstallGetInfo(mcpHandle, installFolder.c_str(), mcpInstallInfo);
 			if(res != 0)
 			{
 				//__os_snprintf(errorText1, sizeof(errorText1), "Error: MCP_InstallGetInfo 0x%08X", MCP_GetLastRawError());
-				messageBox->reload(installFolder, gameName, "Confirm complete WUP files are in the folder.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
+				messageBox->reload("Install failed", gameName, "Confirm complete WUP files are in the folder.", MessageBox::BT_OK, MessageBox::IT_ICONERROR);
 				result = -3;
 				break;
 			}
@@ -269,7 +266,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 			   || (titleIdHigh == 0x0005000C)     // DLC
 			   || (titleIdHigh == 0x00050002))    // Demo
 			{
-				res = MCP_InstallSetTargetDevice(mcpHandle, (MCPInstallTarget)(target));
+				res = MCP_InstallSetTargetDevice(mcpHandle, target);
 				if(res != 0)
 				{
 					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetDevice 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
@@ -278,7 +275,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 					result = -5;
 					break;
 				}
-				res = MCP_InstallSetTargetUsb(mcpHandle, (MCPInstallTarget)(target));
+				res = MCP_InstallSetTargetUsb(mcpHandle, target);
 				if(res != 0)
 				{
 					messageBox->reload("Install failed", gameName, fmt("MCP_InstallSetTargetUsb 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);
@@ -294,7 +291,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 				mcpInstallInfo[5] = (unsigned int)0;
 				
 				memset(mcpInstallPath, 0, MAX_INSTALL_PATH_LENGTH);
-				snprintf(mcpInstallPath, MAX_INSTALL_PATH_LENGTH, installFolder.c_str());
+				__os_snprintf(mcpInstallPath, MAX_INSTALL_PATH_LENGTH, installFolder.c_str());
 				memset(mcpPathInfoVector, 0, 0x0C);
 				
 				mcpPathInfoVector[0] = (unsigned int)mcpInstallPath;
@@ -312,7 +309,7 @@ void InstallWindow::InstallProcess(int pos, int total)
 				{
 					memset(mcpInstallInfo, 0, 0x24);
 					
-					MCP_InstallGetProgress(mcpHandle, (MCPInstallProgress*)mcpInstallInfo);
+					MCP_InstallGetProgress(mcpHandle, mcpInstallInfo);
 					
 					if(mcpInstallInfo[0] == 1)
 					{

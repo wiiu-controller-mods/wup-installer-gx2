@@ -1,3 +1,4 @@
+#include <gctypes.h>
 #include <malloc.h>
 #include <string.h>
 #include "Resources.h"

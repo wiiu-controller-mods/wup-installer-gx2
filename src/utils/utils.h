@@ -8,16 +8,6 @@
 extern "C" {
 #endif
 
-#define FlushBlock(addr)   asm volatile("dcbf %0, %1\n"                                \
-                                        "icbi %0, %1\n"                                \
-                                        "sync\n"                                       \
-                                        "eieio\n"                                      \
-                                        "isync\n"                                      \
-                                        :                                              \
-                                        :"r"(0), "r"(((addr) & ~31))                   \
-                                        :"memory", "ctr", "lr", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"     \
-                                        );
-
 #define LIMIT(x, min, max)																	\
 	({																						\
 		typeof( x ) _x = x;																	\

@@ -29,7 +29,7 @@
 
 #include <vector>
 #include <string>
-#include "common/types.h"
+#include <gctypes.h>
 
 typedef struct
 {

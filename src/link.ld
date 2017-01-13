@@ -1,7 +1,7 @@
 OUTPUT(wup_installer_gx2.elf);
 
 /* Tell linker where our application entry is so the garbage collect can work correct */
-ENTRY(main);
+ENTRY(__entry_menu);
 
 SECTIONS {
 	. = 0x00802000;

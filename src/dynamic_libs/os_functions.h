@@ -24,9 +24,8 @@
 #ifndef __OS_FUNCTIONS_H_
 #define __OS_FUNCTIONS_H_
 
-#include "common/types.h"
+#include <gctypes.h>
 #include "common/os_defs.h"
-#include <coreinit/thread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,15 +42,98 @@ extern "C" {
 #define FLUSH_DATA_BLOCK(addr)          asm volatile("dcbf 0, %0; sync" : : "r"(((addr) & ~31)))
 #define INVAL_DATA_BLOCK(addr)          asm volatile("dcbi 0, %0; sync" : : "r"(((addr) & ~31)))
 
+#define EXPORT_DECL(res, func, ...)     res (* func)(__VA_ARGS__) __attribute__((section(".data"))) = 0;
+#define EXPORT_VAR(type, var)           type var __attribute__((section(".data")));
+
+
+#define EXPORT_FUNC_WRITE(func, val)    *(u32*)(((u32)&func) + 0) = (u32)val
+
+#define OS_FIND_EXPORT(handle, func)    funcPointer = 0;                                                                \
+                                        OSDynLoad_FindExport(handle, 0, # func, &funcPointer);                          \
+                                        if(!funcPointer)                                                                \
+                                            OSFatal("Function " # func " is NULL");                                     \
+                                        EXPORT_FUNC_WRITE(func, funcPointer);
+
+#define OS_FIND_EXPORT_EX(handle, func, func_p)                                                                         \
+                                        funcPointer = 0;                                                                \
+                                        OSDynLoad_FindExport(handle, 0, # func, &funcPointer);                          \
+                                        if(!funcPointer)                                                                \
+                                            OSFatal("Function " # func " is NULL");                                     \
+                                        EXPORT_FUNC_WRITE(func_p, funcPointer);
+
 #define OS_MUTEX_SIZE                   44
 
 /* Handle for coreinit */
-//extern unsigned int coreinit_handle;
+extern unsigned int coreinit_handle;
 void InitOSFunctionPointers(void);
+
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! Lib handle functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern int (* OSDynLoad_Acquire)(const char* rpl, u32 *handle);
+extern int (* OSDynLoad_FindExport)(u32 handle, int isdata, const char *symbol, void *address);
+
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! Thread functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern int (* OSCreateThread)(void *thread, s32 (*callback)(s32, void*), s32 argc, void *args, u32 stack, u32 stack_size, s32 priority, u32 attr);
+extern int (* OSResumeThread)(void *thread);
+extern int (* OSSuspendThread)(void *thread);
+extern int (* OSIsThreadTerminated)(void *thread);
+extern int (* OSIsThreadSuspended)(void *thread);
+extern int (* OSJoinThread)(void * thread, int * ret_val);
+extern int (* OSSetThreadPriority)(void * thread, int priority);
+extern void (* OSDetachThread)(void * thread);
+extern void (* OSSleepTicks)(u64 ticks);
+extern u64 (* OSGetTick)(void);
+extern u64 (* OSGetTime)(void);
+
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! Mutex functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern void (* OSInitMutex)(void* mutex);
+extern void (* OSLockMutex)(void* mutex);
+extern void (* OSUnlockMutex)(void* mutex);
+extern int (* OSTryLockMutex)(void* mutex);
+
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! System functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern u64 (* OSGetTitleID)(void);
+extern int (* OSGetPFID)(void);
+extern void (* OSShutdown)(void);
+extern void (* __Exit)(int);
+extern void (* OSFatal)(const char* msg);
+extern void (* DCFlushRange)(const void *addr, u32 length);
+extern void (* DCInvalidateRange)(const void *addr, u32 length);
+extern void (* ICInvalidateRange)(const void *addr, u32 length);
+extern void* (* OSEffectiveToPhysical)(const void*);
+extern int (* __os_snprintf)(char* s, int n, const char * format, ...);
+extern void * (* OSAllocFromSystem)(int size, int align);
+extern void (* OSFreeToSystem)(void *ptr);
+
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! Screen functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern void (*OSScreenInit)(void);
+extern unsigned int (*OSScreenGetBufferSizeEx)(unsigned int bufferNum);
+extern int (*OSScreenSetBufferEx)(unsigned int bufferNum, void * addr);
+extern int (*OSScreenClearBufferEx)(unsigned int bufferNum, unsigned int temp);
+extern int (*OSScreenFlipBuffersEx)(unsigned int bufferNum);
+extern int (*OSScreenPutFontEx)(unsigned int bufferNum, unsigned int posX, unsigned int posY, const char * buffer);
+extern int (*OSScreenEnableEx)(unsigned int bufferNum, int enable);
 
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //! MCP functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern unsigned int (*MCP_Open)(void);
+extern int (*MCP_Close)(unsigned int handle);
+extern int (*MCP_InstallTitleAbort)(unsigned int handle);
+extern int (*MCP_InstallGetInfo)(unsigned int handle, const char *path, void * mcp_info);
+extern int (*MCP_InstallTitleAsync)(unsigned int handle, const char *path, void * mcp_info);
+extern int (*MCP_InstallGetProgress)(unsigned int handle, void * buffer);
+extern int (*MCP_InstallSetTargetDevice)(unsigned int handle, int device);
+extern int (*MCP_InstallSetTargetUsb)(unsigned int handle, int device);
 extern int (*MCP_GetLastRawError)(void);
 extern int (*IOS_IoctlvAsync)(unsigned int fd, unsigned int command, int cnt_in, int cnt_out, void *ioctlv, void *ipc_callback, void *usrdata);
 

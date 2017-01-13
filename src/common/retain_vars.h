@@ -1,6 +1,6 @@
 #ifndef RETAINS_VARS_H_
 #define RETAINS_VARS_H_
-#include <wut_types.h>
+#include <gctypes.h>
 
 extern u8 gMode;
 extern u8 gTarget;

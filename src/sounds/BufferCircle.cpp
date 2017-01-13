@@ -23,7 +23,6 @@
  *
  * for WiiXplorer 2010
  ***************************************************************************/
-#include <unistd.h>
 #include <malloc.h>
 #include "utils/utils.h"
 #include "BufferCircle.hpp"

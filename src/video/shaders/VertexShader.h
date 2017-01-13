@@ -31,7 +31,7 @@ public:
         if(vertexShader)
         {
             memset(vertexShader, 0, sizeof(GX2VertexShader));
-            vertexShader->mode = GX2_SHADER_MODE_UNIFORM_REGISTER;
+            vertexShader->shader_mode = GX2_SHADER_MODE_UNIFORM_REGISTER;
         }
     }
 
@@ -40,38 +40,38 @@ public:
 
         if(vertexShader)
         {
-            if(vertexShader->program)
-                free(vertexShader->program);
+            if(vertexShader->shader_data)
+                free(vertexShader->shader_data);
 
-            for(u32 i = 0; i < vertexShader->uniformBlockCount; i++)
-                free((void*)vertexShader->uniformBlocks[i].name);
+            for(u32 i = 0; i < vertexShader->uniform_blocks_count; i++)
+                free((void*)vertexShader->uniform_block[i].name);
 
-            if(vertexShader->uniformBlocks)
-                free((void*)vertexShader->uniformBlocks);
+            if(vertexShader->uniform_block)
+                free((void*)vertexShader->uniform_block);
 
-            for(u32 i = 0; i < vertexShader->uniformVarCount; i++)
-                free((void*)vertexShader->uniformVars[i].name);
+            for(u32 i = 0; i < vertexShader->uniform_vars_count; i++)
+                free((void*)vertexShader->uniform_var[i].name);
 
-            if(vertexShader->uniformVars)
-                free((void*)vertexShader->uniformVars);
+            if(vertexShader->uniform_var)
+                free((void*)vertexShader->uniform_var);
 
-            if(vertexShader->initialValues)
-                free((void*)vertexShader->initialValues);
+            if(vertexShader->initial_value)
+                free((void*)vertexShader->initial_value);
 
-            for(u32 i = 0; i < vertexShader->samplerVarCount; i++)
-                free((void*)vertexShader->samplerVars[i].name);
+            for(u32 i = 0; i < vertexShader->sampler_vars_count; i++)
+                free((void*)vertexShader->sampler_var[i].name);
 
-            if(vertexShader->samplerVars)
-                free((void*)vertexShader->samplerVars);
+            if(vertexShader->sampler_var)
+                free((void*)vertexShader->sampler_var);
 
-            for(u32 i = 0; i < vertexShader->attribVarCount; i++)
-                free((void*)vertexShader->attribVars[i].name);
+            for(u32 i = 0; i < vertexShader->attribute_vars_count; i++)
+                free((void*)vertexShader->attribute_var[i].name);
 
-            if(vertexShader->attribVars)
-                free((void*)vertexShader->attribVars);
+            if(vertexShader->attribute_var)
+                free((void*)vertexShader->attribute_var);
 
-            if(vertexShader->loopVars)
-                free((void*)vertexShader->loopVars);
+            if(vertexShader->loops_data)
+                free((void*)vertexShader->loops_data);
 
             free(vertexShader);
         }
@@ -83,15 +83,15 @@ public:
             return;
 
         //! this must be moved into an area where the graphic engine has access to and must be aligned to 0x100
-        vertexShader->size = programSize;
-        vertexShader->program = (u8*) memalign(GX2_SHADER_ALIGNMENT, vertexShader->size);
-        if(vertexShader->program)
+        vertexShader->shader_size = programSize;
+        vertexShader->shader_data = memalign(GX2_SHADER_ALIGNMENT, vertexShader->shader_size);
+        if(vertexShader->shader_data)
         {
-            memcpy(vertexShader->program, program, vertexShader->size);
-            GX2Invalidate(GX2_INVALIDATE_MODE_CPU_SHADER, vertexShader->program, vertexShader->size);
+            memcpy(vertexShader->shader_data, program, vertexShader->shader_size);
+            GX2Invalidate(GX2_INVALIDATE_CPU_SHADER, vertexShader->shader_data, vertexShader->shader_size);
         }
 
-        memcpy(&vertexShader->regs, regs, regsSize);
+        memcpy(vertexShader->regs, regs, regsSize);
     }
 
     void addUniformVar(const GX2UniformVar & var)
@@ -99,23 +99,23 @@ public:
         if(!vertexShader)
             return;
 
-        u32 idx = vertexShader->uniformVarCount;
+        u32 idx = vertexShader->uniform_vars_count;
 
-        GX2UniformVar* newVar = (GX2UniformVar*) malloc((vertexShader->uniformVarCount + 1) * sizeof(GX2UniformVar));
+        GX2UniformVar* newVar = (GX2UniformVar*) malloc((vertexShader->uniform_vars_count + 1) * sizeof(GX2UniformVar));
         if(newVar)
         {
-            if(vertexShader->uniformVarCount > 0)
+            if(vertexShader->uniform_vars_count > 0)
             {
-                memcpy(newVar, vertexShader->uniformVars, vertexShader->uniformVarCount * sizeof(GX2UniformVar));
-                free(vertexShader->uniformVars);
+                memcpy(newVar, vertexShader->uniform_var, vertexShader->uniform_vars_count * sizeof(GX2UniformVar));
+                free(vertexShader->uniform_var);
             }
-            vertexShader->uniformVars = newVar;
+            vertexShader->uniform_var = newVar;
 
-            memcpy(vertexShader->uniformVars + idx, &var, sizeof(GX2UniformVar));
-            vertexShader->uniformVars[idx].name = (char*) malloc(strlen(var.name) + 1);
-            strcpy((char*)vertexShader->uniformVars[idx].name, var.name);
+            memcpy(vertexShader->uniform_var + idx, &var, sizeof(GX2UniformVar));
+            vertexShader->uniform_var[idx].name = (char*) malloc(strlen(var.name) + 1);
+            strcpy((char*)vertexShader->uniform_var[idx].name, var.name);
 
-            vertexShader->uniformVarCount++;
+            vertexShader->uniform_vars_count++;
         }
     }
 
@@ -124,28 +124,28 @@ public:
         if(!vertexShader)
             return;
 
-        u32 idx = vertexShader->attribVarCount;
+        u32 idx = vertexShader->attribute_vars_count;
 
-        GX2AttribVar* newVar = (GX2AttribVar*) malloc((vertexShader->attribVarCount + 1) * sizeof(GX2AttribVar));
+        GX2AttribVar* newVar = (GX2AttribVar*) malloc((vertexShader->attribute_vars_count + 1) * sizeof(GX2AttribVar));
         if(newVar)
         {
-            if(vertexShader->attribVarCount > 0)
+            if(vertexShader->attribute_vars_count > 0)
             {
-                memcpy(newVar, vertexShader->attribVars, vertexShader->attribVarCount * sizeof(GX2AttribVar));
-                free(vertexShader->attribVars);
+                memcpy(newVar, vertexShader->attribute_var, vertexShader->attribute_vars_count * sizeof(GX2AttribVar));
+                free(vertexShader->attribute_var);
             }
-            vertexShader->attribVars = newVar;
+            vertexShader->attribute_var = newVar;
 
-            memcpy(vertexShader->attribVars + idx, &var, sizeof(GX2AttribVar));
-            vertexShader->attribVars[idx].name = (char*) malloc(strlen(var.name) + 1);
-            strcpy((char*)vertexShader->attribVars[idx].name, var.name);
+            memcpy(vertexShader->attribute_var + idx, &var, sizeof(GX2AttribVar));
+            vertexShader->attribute_var[idx].name = (char*) malloc(strlen(var.name) + 1);
+            strcpy((char*)vertexShader->attribute_var[idx].name, var.name);
 
-            vertexShader->attribVarCount++;
+            vertexShader->attribute_vars_count++;
         }
     }
 
     static inline void setAttributeBuffer(u32 bufferIdx, u32 bufferSize, u32 stride, const void * buffer) {
-        GX2SetAttribBuffer(bufferIdx, bufferSize, stride, (void*)buffer);
+        GX2SetAttribBuffer(bufferIdx, bufferSize, stride, buffer);
     }
 
     GX2VertexShader *getVertexShader() const {
@@ -167,7 +167,7 @@ public:
     }
 
     static void setUniformReg(u32 location, u32 size, const void * reg) {
-        GX2SetVertexUniformReg(location, size, (uint32_t*)reg);
+        GX2SetVertexUniformReg(location, size, reg);
     }
 protected:
     u32 attributesCount;
