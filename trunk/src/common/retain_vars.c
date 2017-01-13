@@ -1,4 +1,4 @@
-#include <gctypes.h>
+#include <wut_types.h>
 
 u8 gMode __attribute__((section(".data"))) = 0;
 u8 gTarget __attribute__((section(".data"))) = 0;

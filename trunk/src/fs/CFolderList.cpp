@@ -28,7 +28,7 @@
 #include "CFolderList.hpp"
 #include "DirList.h"
 #include "common/retain_vars.h"
-#include "dynamic_libs/os_functions.h"
+#include <coreinit/internal.h>
 
 void CFolderList::AddFolder()
 {
@@ -143,7 +143,7 @@ int CFolderList::Get()
 {
 	Reset();
 	
-	DirList dir("sd:/install", NULL, DirList::Dirs);
+	DirList dir("fs:/vol/external01/install", NULL, DirList::Dirs);
 	
 	int cnt = dir.GetFilecount();
 	if(cnt > 0)
@@ -158,14 +158,14 @@ int CFolderList::Get()
 	}
 	else
 	{
-		dir.LoadPath("sd:/install", ".tik", DirList::Files);
+		dir.LoadPath("fs:/vol/external01/install", ".tik", DirList::Files);
 		
 		cnt = dir.GetFilecount();
 		if(cnt > 0)
 		{
 			AddFolder();
 			Folders.at(0)->name = "install";
-			Folders.at(0)->path = "sd:/install";
+			Folders.at(0)->path = "fs:/vol/external01/install";
 			Folders.at(0)->selected = false;
 		}
 	}
