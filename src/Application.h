@@ -21,7 +21,9 @@
 #include "video/CVideo.h"
 #include "system/CThread.h"
 #include "menu/MainWindow.h"
-#include "menu/MainStartUp.h"
+
+// forward declaration
+//class FreeTypeGX;
 
 class Application : public CThread
 {
@@ -44,9 +46,6 @@ public:
 	MainWindow *getMainWindow(void) const {
 		return mainWindow;
 	}
-	/*MainStartUp *getMainStartUp(void) const {
-		return mainStartUp;
-	}*/
 	GuiSound *getBgMusic(void) const {
 		return bgMusic;
 	}
@@ -54,9 +53,7 @@ public:
 	void exec(void);
 	void fadeOut(void);
 	
-	void quit(void) {
-		exitApplication = true;
-	}
+    void quit(void);
 	
 	void exitDisable() {
 		exitDisabled = true;
@@ -65,20 +62,23 @@ public:
 	void exitEnable() {
 		exitDisabled = false;
 	}
-
+	
 private:
 	Application();
 	virtual ~Application();
 	
+    bool procUI(void);
+
 	static Application *applicationInstance;
 	static bool exitApplication;
+    static bool quitRequest;
 	
 	void executeThread(void);
 	
 	GuiSound *bgMusic;
 	CVideo *video;
 	MainWindow *mainWindow;
-	MainStartUp *mainStartUp;
+    FreeTypeGX *fontSystem;
 	GuiController *controller[5];
 	
 	bool exitDisabled;
