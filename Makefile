@@ -33,13 +33,14 @@ export ELF2RPL	:= $(WUT_ROOT)/bin/elf2rpl
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	wupinstallergx2
+TARGET		:=	wup_installer_gx2
 BUILD		:=	build
 BUILD_DBG	:=	$(TARGET)_dbg
 SOURCES		:=	src \
 				src/common \
 				src/dynamic_libs \
 				src/fs \
+				src/game \
 				src/gui \
 				src/menu \
 				src/resources \
@@ -47,7 +48,7 @@ SOURCES		:=	src \
 				src/system \
 				src/utils \
 				src/video \
-				src/video/shaders \
+				src/video/shaders
 DATA		:=	data \
 				data/images \
 				data/fonts \
@@ -74,7 +75,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lcrt -lcoreinit -lproc_ui -lnsysnet -lsndcore2 -lvpad -lgx2 -lsysapp -lgd -lpng -ljpeg -lz -lfreetype -lmad -lvorbisidec
+LIBS	:= -lcrt -lcoreinit -lproc_ui -lnsysnet -lsndcore2 -lvpad -lgx2 -lsysapp -lgd -lpng -lz -lfreetype -lmad -lvorbisidec
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -151,9 +152,13 @@ clean: clean_channel
 			$(CURDIR)/src/common/svnrev.c $(CURDIR)/src/resources/filelist.h
 
 #---------------------------------------------------------------------------------
+run:
+	wiiload $(OUTPUT).rpx
+
+#---------------------------------------------------------------------------------
 install_channel: $(BUILD) NUSPacker.jar encryptKeyWith
 	@cp $(OUTPUT).rpx channel/code/
-	java -jar NUSPacker.jar -in "channel" -out "install_channel"
+	java -jar NUSPacker.jar -in "channel" -out "wupgx2_install_channel"
 
 NUSPacker.jar:
 	@echo "Missing NUSPacker.jar! Insert the \"NUSPacker.jar\" file in the WUP Installer GX2 Makefile path!"
@@ -164,7 +169,7 @@ encryptKeyWith:
 	@exit 1
 	
 clean_channel:
-	@rm -fr install_channel fst.bin output tmp channel/code/wupinstallergx2.rpx
+	@rm -fr wupgx2_install_channel fst.bin output tmp channel/code/wup_installer_gx2.rpx
 
 #---------------------------------------------------------------------------------
 else
@@ -183,6 +188,7 @@ $(OUTPUT).elf:  $(OFILES)
 %.elf: $(OFILES)
 	@echo "linking ... $(TARGET).elf"
 	$(Q)$(LD) $^ $(LDFLAGS) -o $@ $(LIBPATHS) $(LIBS)
+#	$(Q)$(OBJCOPY) -S -R .comment -R .gnu.attributes ../$(BUILD_DBG).elf $@
 
 #---------------------------------------------------------------------------------
 %.rpx: %.elf
@@ -244,11 +250,6 @@ $(OUTPUT).elf:  $(OFILES)
 
 #---------------------------------------------------------------------------------
 %.ogg.o : %.ogg
-	@echo $(notdir $<)
-	@bin2s -a 32 $< | $(AS) -o $(@)
-
-#---------------------------------------------------------------------------------
-%.dsp.o : %.dsp
 	@echo $(notdir $<)
 	@bin2s -a 32 $< | $(AS) -o $(@)
 

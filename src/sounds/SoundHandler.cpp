@@ -25,13 +25,14 @@
  ***************************************************************************/
 #include <unistd.h>
 #include <malloc.h>
+#include "dynamic_libs/ax_functions.h"
+#include "dynamic_libs/os_functions.h"
 #include "common/common.h"
 #include "fs/CFile.hpp"
 #include "SoundHandler.hpp"
 #include "WavDecoder.hpp"
 #include "Mp3Decoder.hpp"
 #include "OggDecoder.hpp"
-#include "dynamic_libs/os_functions.h"
 
 SoundHandler * SoundHandler::handlerInstance = NULL;
 
@@ -220,6 +221,12 @@ SoundDecoder * SoundHandler::GetSoundDecoder(const u8 * sound, int length)
 
 void SoundHandler::executeThread()
 {
+    // v2 sound lib can not properly end transition audio on old firmwares
+    if (OS_FIRMWARE >= 400 && OS_FIRMWARE <= 410)
+    {
+        ProperlyEndTransitionAudio();
+    }
+
     //! initialize 48 kHz renderer
     AXInitParams params;
     memset(&params, 0, sizeof(params));

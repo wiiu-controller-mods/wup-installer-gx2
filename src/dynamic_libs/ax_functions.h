@@ -1,6 +1,6 @@
 /****************************************************************************
- * Copyright (C) 2011
- * by Dj_Skual
+ * Copyright (C) 2015
+ * by Dimok
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any
@@ -20,53 +20,21 @@
  *
  * 3. This notice may not be removed or altered from any source
  * distribution.
- *
- * CFolderList.hpp
- *
- * for SaveGame Manager GX 2011
  ***************************************************************************/
-#ifndef _CFOLDERLIST_HPP_
-#define _CFOLDERLIST_HPP_
+#ifndef __AX_FUNCTIONS_H_
+#define __AX_FUNCTIONS_H_
 
-#include <vector>
-#include <string>
-
-
-class CFolderList
-{
-	public:
-		CFolderList() { };
-		~CFolderList() { Reset(); };
-		
-		int Get();
-		void Reset();
-		void AddFolder();
-		int GetCount() { return Folders.size(); };
-		int GetSelectedCount();
-		std::string GetName(int ind);
-		std::string GetPath(int ind);
-		bool IsSelected(int ind);
-		void Select(int ind);
-		void UnSelect(int ind);
-		void SelectAll();
-		void UnSelectAll();
-		int GetFirstSelected();
-		
-		void Click(int ind);
-		
-	protected:
-		void AddSequence(int index);
-		void RemoveSequence(int index);
-		
-		typedef struct _FolderStruct
-		{
-			std::string name;
-			std::string path;
-			bool selected;
-			int sequence;
-		} FolderStruct;
-		
-		std::vector<FolderStruct *> Folders;
-};
-
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+#include "common/types.h"
+
+void InitAXFunctionPointers(void);
+void ProperlyEndTransitionAudio(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __VPAD_FUNCTIONS_H_

@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#include <coreinit/core.h>
+//#include <coreinit/core.h>
 #include <coreinit/foreground.h>
 #include <proc_ui/procui.h>
-#include <sysapp/launch.h>
+//#include <sysapp/launch.h>
 #include "Application.h"
 #include "gui/FreeTypeGX.h"
 #include "gui/GuiImageAsync.h"
@@ -28,7 +28,8 @@
 #include "system/exception_handler.h"
 #include "system/memory.h"
 #include "utils/logger.h"
-#include "video/CursorDrawer.h"
+//#include "video/CursorDrawer.h"
+#include "menu/HomeImg.h"
 
 Application *Application::applicationInstance = NULL;
 bool Application::exitApplication = false;
@@ -40,6 +41,7 @@ Application::Application()
 	, video(NULL)
 	, mainWindow(NULL)
     , fontSystem(NULL)
+	, exitDisabled(false)
 {
 	controller[0] = new VPadController(GuiTrigger::CHANNEL_1);
 	controller[1] = new WPadController(GuiTrigger::CHANNEL_2);
@@ -48,12 +50,13 @@ Application::Application()
 	controller[4] = new WPadController(GuiTrigger::CHANNEL_5);
 	
     //! load resources
-    Resources::LoadFiles("fs:/vol/content");
+    //Resources::LoadFiles("fs:/vol/content");
+	Resources::LoadFiles("fs:/vol/external01/wiiu/apps/wup_installer_gx2/resources");
 
 	bgMusic = new GuiSound(Resources::GetFile("bgMusic.ogg"), Resources::GetFileSize("bgMusic.ogg"));
 	bgMusic->SetLoop(true);
 	bgMusic->Play();
-	bgMusic->SetVolume(100);
+	bgMusic->SetVolume(60);
 
 	exitApplication = false;
 
@@ -62,20 +65,28 @@ Application::Application()
 
 Application::~Application()
 {
+	log_printf("Destroy music\n");
 	delete bgMusic;
 	
+	log_printf("Destroy controller\n");
 	for(int i = 0; i < 5; i++)
 		delete controller[i];
 	
-	AsyncDeleter::destroyInstance();
-	GuiImageAsync::threadExit();
-	Resources::Clear();
+	log_printf("Destroy HomeImg class\n");
+	HomeImg::destroyInstance();
 	
+	log_printf("Destroy async deleter\n");
+	AsyncDeleter::destroyInstance();
+	
+	log_printf("Stop sound handler\n");
 	SoundHandler::DestroyInstance();
 	
-	CursorDrawer::destroyInstance();
+	//GuiImageAsync::threadExit();
+	Resources::Clear();
 	
-	//ProcUIShutdown();
+	//CursorDrawer::destroyInstance();
+	
+	ProcUIShutdown();
 }
 
 void Application::exec()
@@ -143,8 +154,8 @@ void Application::fadeOut()
 bool Application::procUI(void)
 {
     bool executeProcess = false;
-
-    switch(ProcUIProcessMessages(true))
+	
+	switch(ProcUIProcessMessages(true))
     {
 		case PROCUI_STATUS_EXITING:
 		{
@@ -195,7 +206,7 @@ bool Application::procUI(void)
 					
 					//! setup default Font
 					log_printf("Initialize main font system\n");
-					FreeTypeGX *fontSystem = new FreeTypeGX(Resources::GetFile("font.ttf"), Resources::GetFileSize("font.ttf"), true);
+					fontSystem = new FreeTypeGX(Resources::GetFile("font.ttf"), Resources::GetFileSize("font.ttf"), true);
 					GuiText::setPresetFont(fontSystem);
 					
 					if(mainWindow == NULL)
@@ -237,6 +248,14 @@ void Application::executeThread(void)
 			if(controller[i]->update(video->getTvWidth(), video->getTvHeight()) == false)
 				continue;
 			
+			if(exitDisabled)
+			{
+				if(controller[i]->data.buttons_d & VPAD_BUTTON_HOME)
+				{
+					HomeImg::Show();
+				}
+			}
+			
 			//! update controller states
 			mainWindow->update(controller[i]);
 		}
@@ -275,8 +294,19 @@ void Application::executeThread(void)
     {
         fadeOut();
     }
+	
+	log_printf("delete mainWindow\n");
+    delete mainWindow;
+    mainWindow = NULL;
 
-	delete mainWindow;
-	delete fontSystem;
-	delete video;
+    log_printf("delete fontSystem\n");
+    delete fontSystem;
+    fontSystem = NULL;
+
+    log_printf("delete video\n");
+    delete video;
+    video = NULL;
+
+    log_printf("deinitialize memory\n");
+    memoryRelease();
 }

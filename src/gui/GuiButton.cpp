@@ -214,9 +214,9 @@ void GuiButton::draw(CVideo *v)
 
 void GuiButton::update(GuiController * c)
 {
-	if(!c || isStateSet(STATE_DISABLED|STATE_HIDDEN|STATE_DISABLE_INPUT, c->chan))
+	if(!c || isStateSet(STATE_DISABLED|STATE_HIDDEN, c->chan))
 		return;
-	else if(parentElement && (parentElement->isStateSet(STATE_DISABLED|STATE_HIDDEN|STATE_DISABLE_INPUT, c->chan)))
+	else if(parentElement && (parentElement->isStateSet(STATE_DISABLED|STATE_HIDDEN, c->chan)))
 		return;
 
     if(selectable)
