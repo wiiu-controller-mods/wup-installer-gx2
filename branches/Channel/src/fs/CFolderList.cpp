@@ -27,8 +27,8 @@
  ***************************************************************************/
 #include "CFolderList.hpp"
 #include "DirList.h"
-#include "dynamic_libs/os_functions.h"
-#include <stdio.h>
+#include "CFile.hpp"
+#include <coreinit/internal.h>
 
 void CFolderList::AddFolder()
 {
@@ -36,6 +36,7 @@ void CFolderList::AddFolder()
 	newFolder->name = "";
 	newFolder->path = "";
 	newFolder->selected = false;
+	newFolder->sequence = 0;
 	
 	Folders.push_back(newFolder);
 }
@@ -70,6 +71,7 @@ void CFolderList::Select(int ind)
 		return;
 
 	Folders.at(ind)->selected = true;
+	AddSequence(ind);
 }
 
 void CFolderList::UnSelect(int ind)
@@ -78,6 +80,7 @@ void CFolderList::UnSelect(int ind)
 		return;
 
 	Folders.at(ind)->selected = false;
+	RemoveSequence(ind);
 }
 
 void CFolderList::SelectAll()
@@ -86,7 +89,10 @@ void CFolderList::SelectAll()
 		return;
 	
 	for(u32 i = 0; i < Folders.size(); i++)
+	{
 		Folders.at(i)->selected = true;
+		AddSequence(i);
+	}
 }
 
 void CFolderList::UnSelectAll()
@@ -95,7 +101,10 @@ void CFolderList::UnSelectAll()
 		return;
 	
 	for(u32 i = 0; i < Folders.size(); i++)
+	{
 		Folders.at(i)->selected = false;
+		Folders.at(i)->sequence = 0;
+	}
 }
 
 int CFolderList::GetFirstSelected()
@@ -106,11 +115,34 @@ int CFolderList::GetFirstSelected()
 	int found = -1;
 	for(u32 i = 0; i < Folders.size() && found < 0; i++)
 	{
-		if(Folders.at(i)->selected)
+		if(Folders.at(i)->sequence == 1)
 			found = i;
 	}
 	
 	return found;
+}
+
+void CFolderList::AddSequence(int ind)
+{
+	if(!Folders.size())
+		return;
+	
+	Folders.at(ind)->sequence = GetSelectedCount();
+}
+
+void CFolderList::RemoveSequence(int ind)
+{
+	if(!Folders.size())
+		return;
+	
+	int removedSequence = Folders.at(ind)->sequence;
+	Folders.at(ind)->sequence = 0;
+	
+	for(u32 i = 0; i < Folders.size(); i++)
+	{
+		if(Folders.at(i)->sequence > removedSequence)
+			Folders.at(i)->sequence = Folders.at(i)->sequence-1;
+	}
 }
 
 void CFolderList::Click(int ind)
@@ -118,7 +150,10 @@ void CFolderList::Click(int ind)
 	if(ind < 0 || ind >= (int) Folders.size())
 		return;
 
-	Folders.at(ind)->selected = !Folders.at(ind)->selected;
+	if(IsSelected(ind))
+		UnSelect(ind);
+	else
+		Select(ind);
 }
 
 void CFolderList::Reset()
@@ -148,12 +183,27 @@ int CFolderList::Get()
 	int cnt = dir.GetFilecount();
 	if(cnt > 0)
 	{
+		int j = 0;
+		
 		for(int i = 0; i < cnt; i++)
 		{
-			AddFolder();
-			Folders.at(i)->name = dir.GetFilename(i);
-			Folders.at(i)->path = dir.GetFilepath(i);
-			Folders.at(i)->selected = false;
+			std::string path = dir.GetFilepath(i);
+			path += "/title.tik";
+			
+			CFile * file = new CFile(path, CFile::ReadOnly);
+			
+			if(file->isOpen())
+			{
+				AddFolder();
+				Folders.at(j)->name = dir.GetFilename(i);
+				Folders.at(j)->path = dir.GetFilepath(i);
+				Folders.at(j)->selected = false;
+				Folders.at(j)->sequence = 0;
+				
+				j++;
+			}
+			
+			delete file;
 		}
 	}
 	else
@@ -167,6 +217,7 @@ int CFolderList::Get()
 			Folders.at(0)->name = "install";
 			Folders.at(0)->path = "fs:/vol/external01/install";
 			Folders.at(0)->selected = false;
+			Folders.at(0)->sequence = 0;
 		}
 	}
 	

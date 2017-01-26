@@ -232,6 +232,16 @@ void Scrollbar::SetSelectedIndex(int pos)
 	listChanged(SelItem, SelInd);
 }
 
+void Scrollbar::SetSelected(int selItem, int selIndex)
+{
+	if(SelItem == selItem && SelInd == selIndex)
+		return;
+	
+	SelItem = selItem;
+	SelInd = selIndex;
+	listChanged(SelItem, SelInd);
+}
+
 void Scrollbar::SetEntrieCount(int cnt)
 {
 	if(EntrieCount == cnt)

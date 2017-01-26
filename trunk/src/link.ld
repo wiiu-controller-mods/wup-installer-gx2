@@ -1,7 +1,7 @@
 OUTPUT(wup_installer_gx2.elf);
 
 /* Tell linker where our application entry is so the garbage collect can work correct */
-ENTRY(main);
+ENTRY(__entry_menu);
 
 SECTIONS {
 	. = 0x00802000;
@@ -13,11 +13,11 @@ SECTIONS {
 	}
 	.data : {
 		*(.data*);
-		
+
 		__sdata_start = .;
 		*(.sdata*);
 		__sdata_end = .;
-		
+
 		__sdata2_start = .;
 		*(.sdata2*);
 		__sdata2_end = .;
@@ -30,7 +30,7 @@ SECTIONS {
 		__bss_end = .;
 	}
 	__CODE_END = .;
-	
+
 	/DISCARD/ : {
 		*(*);
 	}

@@ -58,6 +58,17 @@ extern int (*IOS_IoctlvAsync)(unsigned int fd, unsigned int command, int cnt_in,
 typedef unsigned char (*exception_callback)(void * interruptedContext);
 extern void (* OSSetExceptionCallback)(u8 exceptionType, exception_callback newCallback);
 
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! Energy Saver functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern int (*IMEnableAPD)(void);
+extern int (*IMDisableAPD)(void);
+extern int (*IMIsAPDEnabled)(int * result);
+
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//! Home Menu functions
+//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+extern bool (*OSEnableHomeButtonMenu)(bool enable);
 
 #ifdef __cplusplus
 }

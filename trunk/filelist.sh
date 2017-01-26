@@ -42,6 +42,8 @@ cat <<EOF > $outFile
 #ifndef _FILELIST_H_
 #define _FILELIST_H_
 
+#include <gctypes.h>
+
 typedef struct _RecourceFile
 {
 	const char *filename;

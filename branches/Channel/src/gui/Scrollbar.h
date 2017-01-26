@@ -46,6 +46,7 @@ class Scrollbar : public GuiElement, public sigslot::has_slots<>
 		void SetRowSize(int size);
 		void SetSelectedItem(int pos);
 		void SetSelectedIndex(int pos);
+		void SetSelected(int selItem, int selIndex);
 		void SetEntrieCount(int cnt);
 	protected:
 		void setScrollboxPosition(int SelItem, int SelInd);

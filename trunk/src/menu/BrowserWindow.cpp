@@ -49,7 +49,8 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 	, installButton(selectImg.getWidth(), selectImg.getHeight())
 {
 	folderList = list;
-	currentYOffset = 0;
+	pageIndex = 0;
+	selectedItem = -1;
 	
     buttonCount = folderList->GetCount();
 	folderButtons.resize(buttonCount);
@@ -83,10 +84,11 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 	
 	if(buttonCount > MAX_FOLDERS_PER_PAGE)
     {
-		scrollbar.SetPageSize((buttonImageData->getHeight() + 30) * (buttonCount - MAX_FOLDERS_PER_PAGE));
-        scrollbar.SetEntrieCount((buttonImageData->getHeight() + 30) * (buttonCount - MAX_FOLDERS_PER_PAGE));
+		scrollbar.SetPageSize(MAX_FOLDERS_PER_PAGE);
+        scrollbar.SetEntrieCount(buttonCount);
         scrollbar.setAlignment(ALIGN_RIGHT | ALIGN_MIDDLE);
         scrollbar.setPosition(0, -30);
+		scrollbar.SetSelected(0, 0);
         scrollbar.listChanged.connect(this, &BrowserWindow::OnScrollbarListChange);
         this->append(&scrollbar);
     }
@@ -186,6 +188,9 @@ void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *
 		{
 			folderList->Click(i);
 			folderButtons[i].folderButton->setState(STATE_SELECTED);
+			
+			selectedItem = i - pageIndex;
+			scrollbar.SetSelectedItem(selectedItem);
 		}
 		else
 			folderButtons[i].folderButton->clearState(STATE_SELECTED);
@@ -215,6 +220,11 @@ void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controll
 		folderButtons[index].folderButton->clearState(STATE_SELECTED);
 		index--;
 		folderButtons[index].folderButton->setState(STATE_SELECTED);
+		
+		if(selectedItem == 0 && pageIndex > 0)
+			--pageIndex;
+		else if(pageIndex+selectedItem > 0)
+			--selectedItem;
 	}
 	else if(trigger == &buttonDownTrigger && index < buttonCount-1)
 	{
@@ -222,9 +232,17 @@ void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controll
 			folderButtons[index].folderButton->clearState(STATE_SELECTED);
 		index++;
 		folderButtons[index].folderButton->setState(STATE_SELECTED);
+		
+		if(pageIndex+selectedItem + 1 < buttonCount)
+		{
+			if(selectedItem == MAX_FOLDERS_PER_PAGE-1)
+				pageIndex++;
+			else
+				selectedItem++;
+		}
 	}
 	
-	scrollbar.SetSelectedItem((buttonImageData->getHeight() + 30) * index);
+	scrollbar.SetSelected(selectedItem, pageIndex);
 }
 	
 void BrowserWindow::OnPlusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
@@ -256,12 +274,11 @@ void BrowserWindow::OnInstallButtonClick(GuiButton *button, const GuiController 
 	installButtonClicked(this);
 }
 
-void BrowserWindow::OnScrollbarListChange(int selectItem, int pageIndex)
+void BrowserWindow::OnScrollbarListChange(int selItem, int selIndex)
 {
-    currentYOffset = selectItem + pageIndex;
-
-    for(int i = 0; i < buttonCount; i++)
-    {
-        folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * i + currentYOffset);
-    }
+    selectedItem = selItem;
+	pageIndex = selIndex;
+	
+	for(int i = 0; i < buttonCount; i++)
+		folderButtons[i].folderButton->setPosition(0, 150 - (folderButtons[i].folderButtonImg->getHeight() + 30) * (i - pageIndex));
 }

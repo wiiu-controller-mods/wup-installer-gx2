@@ -185,12 +185,12 @@ void MainWindow::SetupMainView()
 	currentDrcFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
 	currentDrcFrame->append(&bgParticleImg);
 	
-	if(!gInstallMiimakerAsked)
+	if(gMode != WUP_MODE_MII_MAKER_INSTALL)
 		SetBrowserWindow();
 	
 	SetDrcHeader();
 	
-	if(!gInstallMiimakerAsked && (folderList == NULL))
+	if((gMode != WUP_MODE_MII_MAKER_INSTALL) && (folderList == NULL))
 	{
 		MessageBox * messageBox = new MessageBox(MessageBox::BT_OK, MessageBox::IT_ICONERROR, false);
 		messageBox->setState(GuiElement::STATE_DISABLED);
@@ -274,7 +274,7 @@ void MainWindow::OnBrowserCloseEffectFinish(GuiElement *element)
 }
 void MainWindow::OnInstallWindowClosed(GuiElement *element)
 {
-	if(!gInstallMiimakerAsked)
+	if(gMode != WUP_MODE_MII_MAKER_INSTALL)
 	{
 		SetBrowserWindow();
 		currentDrcFrame->bringToFront(&headerFrame);
@@ -292,7 +292,7 @@ void MainWindow::OnErrorMessageBoxClick(GuiElement *element, int ok)
 
 void MainWindow::OnMiiMakerInstallWindowClosed(GuiElement *element)
 {
-	gInstallMiimakerFinished = true;
+	gMode = WUP_MODE_MII_MAKER_FINISH;
 	Application::instance()->quit();
 }
 
@@ -302,7 +302,7 @@ void MainWindow::OnOpenEffectFinish(GuiElement *element)
 	element->effectFinished.disconnect(this);
 	element->clearState(GuiElement::STATE_DISABLED);
 	
-	if(gInstallMiimakerAsked && folderList == NULL)
+	if((gMode == WUP_MODE_MII_MAKER_INSTALL) && folderList == NULL)
 	{
 		folderList = new CFolderList();
 		folderList->GetFromArray();

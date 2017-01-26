@@ -17,13 +17,12 @@
  ****************************************************************************/
 #include "Application.h"
 #include "InstallWindow.h"
-#include "MainWindow.h"
 #include "utils/StringTools.h"
 #include "common/common.h"
 #include "dynamic_libs/os_functions.h"
+#include "system/power.h"
 #include <coreinit/mcp.h>
 #include <coreinit/memory.h>
-#include <stdio.h>
 
 #define MCP_COMMAND_INSTALL_ASYNC   0x81
 #define MAX_INSTALL_PATH_LENGTH     0x27F
@@ -138,7 +137,14 @@ void InstallWindow::OnCloseTvProgressEffectFinish(GuiElement * element)
 
 void InstallWindow::executeThread()
 {
+	Application::instance()->exitDisable();
+	OSEnableHomeButtonMenu(false);
+	
 	canceled = false;
+	
+	bool APD_enabled = isEnabledAutoPowerDown();
+	if(APD_enabled)
+		disableAutoPowerDown();
 	
 	int total = folderList->GetSelectedCount();
 	int pos = 1;
@@ -170,6 +176,12 @@ void InstallWindow::executeThread()
 		
 		pos++;
 	}
+	
+	if(APD_enabled)
+		enableAutoPowerDown();
+	
+	OSEnableHomeButtonMenu(true);
+	Application::instance()->exitEnable();
 }
 
 void InstallWindow::InstallProcess(int pos, int total)

@@ -17,10 +17,9 @@
 #ifndef GUI_IMAGEDATA_H_
 #define GUI_IMAGEDATA_H_
 
+#include <gctypes.h>
 #include <gd.h>
-#include <gx2/enum.h>
-#include <gx2/texture.h>
-#include <gx2/sampler.h>
+#include "dynamic_libs/gx2_functions.h"
 #include "system/AsyncDeleter.h"
 
 class GuiImageData : public AsyncDeleter::Element
@@ -30,13 +29,13 @@ public:
     GuiImageData();
     //!\param img Image data
     //!\param imgSize The image size
-    GuiImageData(const u8 * img, int imgSize, GX2TexClampMode textureClamp = GX2_TEX_CLAMP_MODE_CLAMP, GX2SurfaceFormat textureFormat = GX2_SURFACE_FORMAT_UNORM_R8_G8_B8_A8);
+    GuiImageData(const u8 * img, int imgSize, int textureClamp = GX2_TEX_CLAMP_CLAMP, int textureFormat = GX2_SURFACE_FORMAT_TCS_R8_G8_B8_A8_UNORM);
     //!Destructor
     virtual ~GuiImageData();
     //!Load image from buffer
     //!\param img Image data
     //!\param imgSize The image size
-    void loadImage(const u8 * img, int imgSize, GX2TexClampMode textureClamp = GX2_TEX_CLAMP_MODE_CLAMP, GX2SurfaceFormat textureFormat = GX2_SURFACE_FORMAT_UNORM_R8_G8_B8_A8);
+    void loadImage(const u8 * img, int imgSize, int textureClamp = GX2_TEX_CLAMP_CLAMP, int textureFormat = GX2_SURFACE_FORMAT_TCS_R8_G8_B8_A8_UNORM);
     //! getter functions
     const GX2Texture * getTexture() const { return texture; };
     const GX2Sampler * getSampler() const { return sampler; };

@@ -17,7 +17,7 @@ extern "C" int Menu_Main(void)
 	//!                    Initialize heap memory                        *
 	//!*******************************************************************
 	log_print("Initialize memory management\n");
-	memoryInitialize();
+	//memoryInitialize();
 	
 	//!*******************************************************************
 	//!                    Enter main application                        *
@@ -27,10 +27,6 @@ extern "C" int Menu_Main(void)
 	log_printf("Main application stopped\n");
 	
 	Application::destroyInstance();
-	
-	log_printf("Release memory\n");
-	memoryRelease();
-	log_printf("WUP peace out...\n");
 	
 	return 0;
 }

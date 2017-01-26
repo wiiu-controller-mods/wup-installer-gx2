@@ -20,17 +20,13 @@ ProgressWindow::ProgressWindow(const std::string & title)
     : GuiFrame(0, 0)
     , bgImageData(Resources::GetImageData("progressWindow.png"))
     , bgImage(bgImageData)
-	//, bgBlur(1280, 720, (GX2Color){0, 0, 0, 255})
-    , progressImageBlack(bgImage.getWidth() - 10 , 40, (GX2Color){0, 0, 0, 255})
+	, progressImageBlack(bgImage.getWidth() - 10 , 40, (GX2Color){0, 0, 0, 255})
     , progressImageColored(bgImage.getWidth() - 10, 40, (GX2Color){0, 0, 0, 255})
 {
     width = bgImage.getWidth();
     height = bgImage.getHeight();
     
-	//bgBlur.setAlpha(0.5f);
-	//append(&bgBlur);
-	
-    append(&progressImageBlack);
+	append(&progressImageBlack);
     append(&progressImageColored);
     append(&bgImage);
     
@@ -44,10 +40,10 @@ ProgressWindow::ProgressWindow(const std::string & title)
 	
 	titleText.setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     titleText.setFontSize(28);
-    titleText.setText(title.c_str());
     titleText.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
     titleText.setPosition(0, 32);
     titleText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
+    titleText.setText(title.c_str());
     append(&titleText);
 	
 	infoText.setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -55,6 +51,7 @@ ProgressWindow::ProgressWindow(const std::string & title)
     infoText.setAlignment(ALIGN_CENTER | ALIGN_MIDDLE);
     infoText.setPosition(0, -4);
     infoText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
+    infoText.setText(" ");
     append(&infoText);
 	
     progressImageColored.setParent(&progressImageBlack);
@@ -77,7 +74,7 @@ void ProgressWindow::setTitle(const std::string & title)
 
 void ProgressWindow::setInfo(const std::string & info)
 {
-	infoText.setText(info.c_str());
+    infoText.setText(info.c_str());
 }
 
 void ProgressWindow::setProgress(f32 percent)

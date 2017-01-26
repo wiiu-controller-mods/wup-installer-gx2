@@ -55,7 +55,7 @@ GuiImageAsync::~GuiImageAsync()
 	if (imgData)
         delete imgData;
 
-    //threadExit();
+    threadExit();
 }
 
 void GuiImageAsync::threadAddImage(GuiImageAsync *Image)
@@ -138,7 +138,7 @@ void GuiImageAsync::guiImageAsyncThread(CThread *thread, void *arg)
                     pInUse->imgData = NULL;
                 }
             }
-            pInUse->imageLoaded(pInUse);
+
 			pInUse = NULL;
 		}
 	}
@@ -159,10 +159,9 @@ void GuiImageAsync::threadInit()
 
 void GuiImageAsync::threadExit()
 {
-    if(threadRefCounter)
-        --threadRefCounter;
+    --threadRefCounter;
 
-	if(/*(threadRefCounter == 0) &&*/ (pThread != NULL))
+	if((threadRefCounter == 0) && (pThread != NULL))
 	{
 	    bExitRequested = true;
         delete pThread;

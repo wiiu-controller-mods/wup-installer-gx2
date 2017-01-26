@@ -34,7 +34,7 @@
   <e_manual_version type="unsignedInt" length="4">0</e_manual_version>
   <region type="hexBinary" length="4">FFFFFFFF</region>
   <pc_cero type="unsignedInt" length="4">18</pc_cero>
-  <pc_esrb type="unsignedInt" length="4">18</pc_esrb>
+  <pc_esrb type="unsignedInt" length="4">17</pc_esrb>
   <pc_bbfc type="unsignedInt" length="4">18</pc_bbfc>
   <pc_usk type="unsignedInt" length="4">18</pc_usk>
   <pc_pegi_gen type="unsignedInt" length="4">18</pc_pegi_gen>

@@ -55,12 +55,15 @@ class CFolderList
 		void Click(int ind);
 		
 	protected:
+		void AddSequence(int index);
+		void RemoveSequence(int index);
 		
 		typedef struct _FolderStruct
 		{
 			std::string name;
 			std::string path;
 			bool selected;
+			int sequence;
 		} FolderStruct;
 		
 		std::vector<FolderStruct *> Folders;

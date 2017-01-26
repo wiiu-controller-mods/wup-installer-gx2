@@ -79,7 +79,8 @@ private:
 	GuiButton minusButton;
 	GuiButton installButton;
 	
-    int currentYOffset;
+    int pageIndex;
+	int selectedItem;
 	int buttonCount;
 	
     typedef struct

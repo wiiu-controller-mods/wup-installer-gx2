@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <gctypes.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,11 +28,11 @@
 #include <wchar.h>
 #include <math.h>
 
-#include "common/types.h"
 #include "sigslot.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "dynamic_libs/gx2_types.h"
 #include "resources/Resources.h"
 #include "system/AsyncDeleter.h"
 #include "utils/logger.h"
@@ -459,7 +460,6 @@ class GuiElement : public AsyncDeleter::Element
             STATE_HELD = 0x04,
             STATE_OVER = 0x08,
             STATE_HIDDEN = 0x10,
-            STATE_DISABLE_INPUT = 0x20,
             STATE_DISABLED = 0x80
         };
 

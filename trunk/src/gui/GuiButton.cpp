@@ -91,6 +91,7 @@ void GuiButton::setImageChecked(GuiImage* img)
 	imageChecked = img;
 	if(img) img->setParent(this);
 }
+
 void GuiButton::setIcon(GuiImage* img)
 {
 	icon = img;
@@ -214,9 +215,9 @@ void GuiButton::draw(CVideo *v)
 
 void GuiButton::update(GuiController * c)
 {
-	if(!c || isStateSet(STATE_DISABLED|STATE_HIDDEN|STATE_DISABLE_INPUT, c->chan))
+	if(!c || isStateSet(STATE_DISABLED, c->chan) || isStateSet(STATE_HIDDEN, c->chan))
 		return;
-	else if(parentElement && (parentElement->isStateSet(STATE_DISABLED|STATE_HIDDEN|STATE_DISABLE_INPUT, c->chan)))
+	else if(parentElement && (parentElement->isStateSet(STATE_DISABLED, c->chan) || parentElement->isStateSet(STATE_HIDDEN, c->chan)))
 		return;
 
     if(selectable)

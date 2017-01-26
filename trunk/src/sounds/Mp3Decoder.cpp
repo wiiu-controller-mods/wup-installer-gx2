@@ -29,9 +29,8 @@
 #include <unistd.h>
 #include <malloc.h>
 #include <math.h>
-#include "common/types.h"
-#include "Mp3Decoder.hpp"
 #include "dynamic_libs/os_functions.h"
+#include "Mp3Decoder.hpp"
 
 Mp3Decoder::Mp3Decoder(const char * filepath)
 	: SoundDecoder(filepath)

@@ -24,7 +24,6 @@
 #include "BrowserWindow.h"
 #include "InstallWindow.h"
 #include "gui/GuiParticleImage.h"
-#include "system/CMutex.h"
 
 class CVideo;
 
