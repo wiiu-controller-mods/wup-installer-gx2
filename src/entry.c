@@ -1,39 +1,37 @@
 #include "dynamic_libs/os_functions.h"
-#include <string.h>
-#include <nsysnet/socket.h>
-#include <coreinit/title.h>
-#include <sysapp/launch.h>
+#include "dynamic_libs/sys_functions.h"
+#include "dynamic_libs/socket_functions.h"
 #include "common/retain_vars.h"
 #include "common/common.h"
 #include "utils/logger.h"
 #include "main.h"
 
-int main(int argc, char **argv)
+static volatile u64 currentTitleID = 0;
+
+int __entry_menu(int argc, char **argv)
 {
 	//! do OS (for acquire) and sockets first so we got logging
 	InitOSFunctionPointers();
-	socket_lib_init();
+	InitSocketFunctionPointers();
 	
 	log_init(WUP_LOGGER_IP);
 	log_printf("\nStarting WUP Installer GX2 %s\n", WUP_GX2_VERSION);
 	
+	InitSysFunctionPointers();
+	
 	//! *******************************************************************
 	//! *           Check from where our application is started           *
 	//! *******************************************************************
-	if(!gInstallMiimakerAsked)
+	if(gMode == WUP_MODE_UNKNOW)
 	{
-		gCurrentTitleId = OSGetTitleID();
+		currentTitleID = OSGetTitleID();
 		
-		if (gCurrentTitleId == 0x000500101004A200 || // mii maker eur
-			gCurrentTitleId == 0x000500101004A100 || // mii maker usa
-			gCurrentTitleId == 0x000500101004A000)	 // mii maker jpn
+		if (currentTitleID == 0x000500101004A200 || //! mii maker eur
+			currentTitleID == 0x000500101004A100 || //! mii maker usa
+			currentTitleID == 0x000500101004A000)	//! mii maker jpn
 			gMode = WUP_MODE_MII_MAKER;
-		else if(gCurrentTitleId == 0x0005000013374842) // hbl channel
+		else			   //!0x0005000013374842	//! hbl channel
 			gMode = WUP_MODE_HBC;
-		else if(gCurrentTitleId == 0x0005000057555000) // wup installer channel
-			gMode = WUP_MODE_CHANNEL;
-		else
-			return EXIT_SUCCESS;
 	}
 	
 	//! *******************************************************************
@@ -41,33 +39,27 @@ int main(int argc, char **argv)
 	//! *******************************************************************
 	Menu_Main();
 	
-	if(gInstallMiimakerAsked)
+	int result = EXIT_SUCCESS;
+	
+	if(gMode == WUP_MODE_MII_MAKER_INSTALL)
 	{
-		if(!gInstallMiimakerFinished)
-		{
-			log_printf("SYSLaunchMenu\n");
-			SYSLaunchMenu();
-		}
-		else
-		{
-			gInstallMiimakerAsked = false;
-			gInstallMiimakerFinished = false;
-			
-			log_printf("SYSLaunchTitle\n");
-			SYSLaunchTitle(gCurrentTitleId);
-		}
+		SYSLaunchMenu();
 		
-		log_printf("WUP Installer GX2 exit...\n");
-		log_deinit();
+		result = EXIT_RELAUNCH_ON_LOAD;
+	}
+	else if(gMode == WUP_MODE_MII_MAKER_FINISH)
+	{
+		gMode = WUP_MODE_MII_MAKER;
 		
-		return EXIT_RELAUNCH_ON_LOAD;
+		SYSLaunchTitle(currentTitleID);
+		
+		result = EXIT_RELAUNCH_ON_LOAD;
 	}
 	
 	//! *******************************************************************
 	//! *                 Jump to homebrew launcher                       *
 	//! *******************************************************************
-	log_printf("WUP Installer GX2 exit...\n");
 	log_deinit();
 	
-	return EXIT_SUCCESS;
+	return result;
 }

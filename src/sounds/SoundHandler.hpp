@@ -27,7 +27,7 @@
 #define SOUNDHANDLER_H_
 
 #include <vector>
-#include "common/types.h"
+#include <gctypes.h>
 #include "system/CThread.h"
 #include "SoundDecoder.hpp"
 #include "Voice.h"

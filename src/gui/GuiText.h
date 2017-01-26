@@ -17,7 +17,6 @@
 #ifndef GUI_TEXT_H_
 #define GUI_TEXT_H_
 
-#include "common/gx2_ext.h"
 #include "GuiElement.h"
 //!Forward declaration
 class FreeTypeGX;
@@ -105,6 +104,7 @@ protected:
     static FreeTypeGX * presentFont;
     static int presetSize;
     static int presetMaxWidth;
+    static int presetInternalRenderingScale;
     static int presetAlignment;
     static GX2ColorF32 presetColor;
 
@@ -135,6 +135,7 @@ protected:
     float blurGlowIntensity;
     float blurAlpha;
     glm::vec4 blurGlowColor;
+    float internalRenderingScale;
 };
 
 #endif

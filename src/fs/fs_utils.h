@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "common/types.h"
+#include <gctypes.h>
 
 int MountFS(void *pClient, void *pCmd, char **mount_path);
 int UmountFS(void *pClient, void *pCmd, const char *mountPath);

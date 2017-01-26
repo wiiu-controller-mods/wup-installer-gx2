@@ -18,13 +18,13 @@
 #define _CMUTEX_H_
 
 #include <malloc.h>
-#include <coreinit/mutex.h>
+#include "dynamic_libs/os_functions.h"
 
 class CMutex
 {
 public:
     CMutex() {
-        pMutex = (OSMutex*) malloc(sizeof(OSMutex));
+        pMutex = malloc(OS_MUTEX_SIZE);
         if(!pMutex)
             return;
 
@@ -50,7 +50,7 @@ public:
         return (OSTryLockMutex(pMutex) != 0);
     }
 private:
-    OSMutex *pMutex;
+    void *pMutex;
 };
 
 class CMutexLock
