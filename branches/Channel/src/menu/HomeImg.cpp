@@ -17,7 +17,6 @@
 #include "Application.h"
 #include "HomeImg.h"
 #include "MainWindow.h"
-#include "dynamic_libs/os_functions.h"
 
 HomeImg *HomeImg::homeInstance = NULL;
 

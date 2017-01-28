@@ -16,14 +16,6 @@ int main(int argc, char **argv)
 	log_init(WUP_LOGGER_IP);
 	log_printf("\nStarting WUP Installer GX2 %s\n", WUP_GX2_VERSION);
 	
-	//!test from where our app is started
-	u64 currentTitleID = OSGetTitleID();
-	
-	if (currentTitleID == 0x000500101004A200 || //! mii maker eur
-		currentTitleID == 0x000500101004A100 || //! mii maker usa
-		currentTitleID == 0x000500101004A000)	//! mii maker jpn
-		return EXIT_SUCCESS;
-	
 	//! *******************************************************************
 	//! *                        Call our Main                            *
 	//! *******************************************************************

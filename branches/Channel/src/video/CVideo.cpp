@@ -21,6 +21,7 @@
 #include "shaders/Texture2DShader.h"
 #include "shaders/ColorShader.h"
 #include "shaders/Shader3D.h"
+#include "shaders/ShaderFractalColor.h"
 #include "shaders/FXAAShader.h"
 
 CVideo::CVideo(s32 forceTvScanMode, s32 forceDrcScanMode)
@@ -244,6 +245,7 @@ CVideo::~CVideo()
     ColorShader::destroyInstance();
     FXAAShader::destroyInstance();
     Shader3D::destroyInstance();
+    ShaderFractalColor::destroyInstance();
     Texture2DShader::destroyInstance();
 }
 
@@ -261,4 +263,24 @@ void CVideo::renderFXAA(const GX2Texture * texture, const GX2Sampler *sampler)
     FXAAShader::instance()->setTextureAndSampler(texture, sampler);
     FXAAShader::instance()->draw();
     GX2SetDepthOnlyControl(GX2_ENABLE, GX2_ENABLE, GX2_COMPARE_FUNC_LEQUAL);
+}
+
+void* CVideo::GX2RAlloc(u32 flags, u32 size, u32 align)
+{
+    //! min. alignment
+    if (align < 4)
+        align = 4;
+
+    if ((flags & 0x2040E) && !(flags & 0x40000))
+        return MEM1_alloc(size, align);
+    else
+        return MEM2_alloc(size, align);
+}
+
+void CVideo::GX2RFree(u32 flags, void* p)
+{
+    if ((flags & 0x2040E) && !(flags & 0x40000))
+        MEM1_free(p);
+    else
+        MEM2_free(p);
 }

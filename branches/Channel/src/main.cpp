@@ -17,7 +17,7 @@ extern "C" int Menu_Main(void)
 	//!                    Initialize heap memory                        *
 	//!*******************************************************************
 	log_print("Initialize memory management\n");
-	//memoryInitialize();
+	memoryInitialize();
 	
 	//!*******************************************************************
 	//!                    Enter main application                        *
