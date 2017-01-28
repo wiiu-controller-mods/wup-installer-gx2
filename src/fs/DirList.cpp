@@ -39,12 +39,11 @@ DirList::DirList()
 {
 	Flags = 0;
 	Filter = 0;
-	Depth = 0;
 }
 
-DirList::DirList(const std::string & path, const char *filter, u32 flags, u32 maxDepth)
+DirList::DirList(const std::string & path, const char *filter, u32 flags)
 {
-	this->LoadPath(path, filter, flags, maxDepth);
+	this->LoadPath(path, filter, flags);
 	this->SortList();
 }
 
@@ -53,13 +52,12 @@ DirList::~DirList()
 	ClearList();
 }
 
-bool DirList::LoadPath(const std::string & folder, const char *filter, u32 flags, u32 maxDepth)
+bool DirList::LoadPath(const std::string & folder, const char *filter, u32 flags)
 {
 	if(folder.empty()) return false;
 
 	Flags = flags;
 	Filter = filter;
-	Depth = maxDepth;
 
 	std::string folderpath(folder);
 	u32 length = folderpath.size();
@@ -70,10 +68,6 @@ bool DirList::LoadPath(const std::string & folder, const char *filter, u32 flags
 	//! remove last slash if exists
 	if(length > 0 && folderpath[length-1] == '/')
 		folderpath.erase(length-1);
-
-    //! add root slash if missing
-    if(folderpath.find('/') == std::string::npos)
-        folderpath += '/';
 
 	return InternalLoadPath(folderpath);
 }
@@ -100,17 +94,14 @@ bool DirList::InternalLoadPath(std::string &folderpath)
 			if(strcmp(filename,".") == 0 || strcmp(filename,"..") == 0)
 				continue;
 
-			if((Flags & CheckSubfolders) && (Depth > 0))
+			if(Flags & CheckSubfolders)
 			{
 				int length = folderpath.size();
 				if(length > 2 && folderpath[length-1] != '/')
 					folderpath += '/';
 				folderpath += filename;
-
-                Depth--;
 				InternalLoadPath(folderpath);
 				folderpath.erase(length);
-				Depth++;
 			}
 
 			if(!(Flags & Dirs))
@@ -143,6 +134,10 @@ bool DirList::InternalLoadPath(std::string &folderpath)
 void DirList::AddEntrie(const std::string &filepath, const char * filename, bool isDir)
 {
 	if(!filename)
+		return;
+
+	// Don't list hidden OS X files
+	if(filename[0] == '.' && filename[1] == '_')
 		return;
 
 	int pos = FileInfo.size();

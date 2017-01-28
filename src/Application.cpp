@@ -28,7 +28,7 @@
 #include "system/exception_handler.h"
 #include "system/memory.h"
 #include "utils/logger.h"
-//#include "video/CursorDrawer.h"
+#include "video/CursorDrawer.h"
 #include "menu/HomeImg.h"
 
 Application *Application::applicationInstance = NULL;
@@ -65,26 +65,20 @@ Application::Application()
 
 Application::~Application()
 {
-	log_printf("Destroy music\n");
 	delete bgMusic;
 	
-	log_printf("Destroy controller\n");
 	for(int i = 0; i < 5; i++)
 		delete controller[i];
 	
-	log_printf("Destroy HomeImg class\n");
 	HomeImg::destroyInstance();
 	
-	log_printf("Destroy async deleter\n");
 	AsyncDeleter::destroyInstance();
-	
-	log_printf("Stop sound handler\n");
-	SoundHandler::DestroyInstance();
-	
-	//GuiImageAsync::threadExit();
+	GuiImageAsync::threadExit();
 	Resources::Clear();
 	
-	//CursorDrawer::destroyInstance();
+	SoundHandler::DestroyInstance();
+	
+	CursorDrawer::destroyInstance();
 	
 	ProcUIShutdown();
 }
@@ -294,19 +288,4 @@ void Application::executeThread(void)
     {
         fadeOut();
     }
-	
-	log_printf("delete mainWindow\n");
-    delete mainWindow;
-    mainWindow = NULL;
-
-    log_printf("delete fontSystem\n");
-    delete fontSystem;
-    fontSystem = NULL;
-
-    log_printf("delete video\n");
-    delete video;
-    video = NULL;
-
-    log_printf("deinitialize memory\n");
-    memoryRelease();
 }

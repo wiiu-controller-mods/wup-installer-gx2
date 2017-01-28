@@ -168,6 +168,9 @@ public:
         rayDirection = glm::normalize(rayDirectionWorld);
     }
 private:
+    static void *GX2RAlloc(u32 flags, u32 size, u32 align);
+    static void GX2RFree(u32 flags, void* p);
+
     void renderFXAA(const GX2Texture * texture, const GX2Sampler *sampler);
 
     void *gx2CommandBuffer;

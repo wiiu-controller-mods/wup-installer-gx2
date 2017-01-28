@@ -105,7 +105,6 @@ protected:
     static FreeTypeGX * presentFont;
     static int presetSize;
     static int presetMaxWidth;
-    static int presetInternalRenderingScale;
     static int presetAlignment;
     static GX2ColorF32 presetColor;
 
@@ -136,7 +135,6 @@ protected:
     float blurGlowIntensity;
     float blurAlpha;
     glm::vec4 blurGlowColor;
-    float internalRenderingScale;
 };
 
 #endif

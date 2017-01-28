@@ -13,11 +13,11 @@ SECTIONS {
 	}
 	.data : {
 		*(.data*);
-
+		
 		__sdata_start = .;
 		*(.sdata*);
 		__sdata_end = .;
-
+		
 		__sdata2_start = .;
 		*(.sdata2*);
 		__sdata2_end = .;
@@ -30,7 +30,7 @@ SECTIONS {
 		__bss_end = .;
 	}
 	__CODE_END = .;
-
+	
 	/DISCARD/ : {
 		*(*);
 	}
