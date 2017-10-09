@@ -7,7 +7,7 @@ extern "C" {
 
 #include "os_defs.h"
 
-#define WUP_GX2_VERSION			"v1.1"
+#define WUP_GX2_VERSION			"v1.2"
 
 /* homebrew launcher return codes */
 #ifndef EXIT_SUCCESS

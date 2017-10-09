@@ -277,7 +277,9 @@ void MainWindow::OnInstallWindowClosed(GuiElement *element)
 
 void MainWindow::OnErrorMessageBoxClick(GuiElement *element, int ok)
 {
-	Application::instance()->quit();
+	element->setEffect(EFFECT_FADE, -10, 255);
+	element->setState(GuiElement::STATE_DISABLED);
+	element->effectFinished.connect(this, &MainWindow::OnBrowserCloseEffectFinish);
 }
 
 void MainWindow::OnOpenEffectFinish(GuiElement *element)
