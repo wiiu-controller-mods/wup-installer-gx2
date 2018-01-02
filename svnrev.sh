@@ -50,7 +50,7 @@ cat <<EOF > ./meta/meta.xml
 <app version="1">
   <name>WUP Installer GX2</name>
   <coder>Dj_Skual</coder>
-  <version>v1.2 rev$rev_new</version>
+  <version>v1.3 rev$rev_new</version>
   <release_date>$rev_date</release_date>
   <short_description>WiiU public title installer.</short_description> 
   <long_description>This application can install public titles such as games, game updates or DLC to your system memory (NAND) or the WiiU formatted USB.
