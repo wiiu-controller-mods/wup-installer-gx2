@@ -15,8 +15,8 @@
   <install_flag type="hexBinary" length="4">00000000</install_flag>
   <closing_msg type="unsignedInt" length="4">1</closing_msg>
   <title_version type="unsignedInt" length="4">0</title_version>
-  <title_id type="hexBinary" length="8">0005000057555000</title_id>
-  <group_id type="hexBinary" length="4">00005550</group_id>
+  <title_id type="hexBinary" length="8">0005000010575550</title_id>
+  <group_id type="hexBinary" length="4">00005755</group_id>
   <boss_id type="hexBinary" length="8">0000000000000000</boss_id>
   <os_version type="hexBinary" length="8">000500101000400A</os_version>
   <app_size type="hexBinary" length="8">0000000000000000</app_size>
@@ -35,16 +35,16 @@
   <region type="hexBinary" length="4">FFFFFFFF</region>
   <pc_cero type="unsignedInt" length="4">18</pc_cero>
   <pc_esrb type="unsignedInt" length="4">17</pc_esrb>
-  <pc_bbfc type="unsignedInt" length="4">18</pc_bbfc>
+  <pc_bbfc type="unsignedInt" length="4">192</pc_bbfc>
   <pc_usk type="unsignedInt" length="4">18</pc_usk>
   <pc_pegi_gen type="unsignedInt" length="4">18</pc_pegi_gen>
-  <pc_pegi_fin type="unsignedInt" length="4">18</pc_pegi_fin>
+  <pc_pegi_fin type="unsignedInt" length="4">192</pc_pegi_fin>
   <pc_pegi_prt type="unsignedInt" length="4">18</pc_pegi_prt>
   <pc_pegi_bbfc type="unsignedInt" length="4">18</pc_pegi_bbfc>
   <pc_cob type="unsignedInt" length="4">18</pc_cob>
   <pc_grb type="unsignedInt" length="4">18</pc_grb>
   <pc_cgsrr type="unsignedInt" length="4">18</pc_cgsrr>
-  <pc_oflc type="unsignedInt" length="4">18</pc_oflc>
+  <pc_oflc type="unsignedInt" length="4">13</pc_oflc>
   <pc_reserved0 type="unsignedInt" length="4">192</pc_reserved0>
   <pc_reserved1 type="unsignedInt" length="4">192</pc_reserved1>
   <pc_reserved2 type="unsignedInt" length="4">192</pc_reserved2>

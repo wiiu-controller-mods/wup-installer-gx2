@@ -90,6 +90,7 @@ private:
         GuiImage *folderButtonHighlightedImg;
         GuiButton *folderButton;
         GuiText *folderButtonText;
+        GuiText *folderButtonTextOver;
     } FolderButton;
 
     std::vector<FolderButton> folderButtons;
