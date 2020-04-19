@@ -31,6 +31,7 @@ public:
 	
 private:
     int SearchSelectedButton();
+    int SearchSelectedRightSideButton();
 	
 	void OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
 	void OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger);
@@ -68,6 +69,8 @@ private:
     
     GuiTrigger buttonUpTrigger;
     GuiTrigger buttonDownTrigger;
+    GuiTrigger buttonLeftTrigger;
+    GuiTrigger buttonRightTrigger;
     
 	GuiTrigger plusTrigger;
 	GuiTrigger minusTrigger;
@@ -83,6 +86,9 @@ private:
 	int selectedItem;
 	int buttonCount;
 	
+    bool rightSide = false;
+    std::vector<GuiButton*> rightSideButtons;
+
     typedef struct
     {
         GuiImage *folderButtonImg;

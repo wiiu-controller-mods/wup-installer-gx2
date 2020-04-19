@@ -102,13 +102,15 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 	
 	DPADButtons.setTrigger(&buttonUpTrigger);
     DPADButtons.setTrigger(&buttonDownTrigger);
+	DPADButtons.setTrigger(&buttonLeftTrigger);
+    DPADButtons.setTrigger(&buttonRightTrigger);
     DPADButtons.clicked.connect(this, &BrowserWindow::OnDPADClick);
 	this->append(&DPADButtons);
     
 	AButton.setTrigger(&buttonATrigger);
     AButton.clicked.connect(this, &BrowserWindow::OnAButtonClick);
 	this->append(&AButton);
-	
+
 	plusImg.setAlignment(ALIGN_BOTTOM | ALIGN_RIGHT);
 	plusImg.setPosition(-10, 10);
     plusTxt.setMaxWidth(selectImg.getWidth()-5, GuiText::WRAP);
@@ -122,7 +124,10 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     plusButton.setTrigger(&touchTrigger);
     plusButton.setSoundClick(buttonClickSound);
     plusButton.setEffectGrow();
+	plusButton.setSelectable(true);
+	plusButton.setImageSelectOver(new GuiImage(buttonHighlightedImageData));
     this->append(&plusButton);
+	rightSideButtons.push_back(&plusButton);
 
     minusImg.setAlignment(ALIGN_BOTTOM | ALIGN_RIGHT);
 	minusImg.setPosition(-10, 10);
@@ -137,7 +142,10 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     minusButton.setTrigger(&touchTrigger);
     minusButton.setSoundClick(buttonClickSound);
     minusButton.setEffectGrow();
+	minusButton.setSelectable(true);
+	minusButton.setImageSelectOver(new GuiImage(buttonHighlightedImageData));
     this->append(&minusButton);
+	rightSideButtons.push_back(&minusButton);
 	
 	installTxt.setMaxWidth(unselectImg.getWidth()-5, GuiText::WRAP);
     installButton.setLabel(&installTxt);
@@ -148,7 +156,10 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     installButton.setTrigger(&touchTrigger);
     installButton.setSoundClick(buttonClickSound);
     installButton.setEffectGrow();
+	installButton.setSelectable(true);
+	installButton.setImageSelectOver(new GuiImage(buttonHighlightedImageData));
     this->append(&installButton);
+	rightSideButtons.push_back(&installButton);
 }
 
 BrowserWindow::~BrowserWindow()
@@ -186,6 +197,18 @@ int BrowserWindow::SearchSelectedButton()
 	return index;
 }
 
+int BrowserWindow::SearchSelectedRightSideButton()
+{
+	int index = -1;
+	for(int i = 0; i < 3 && index < 0; i++)
+	{
+		if(rightSideButtons[i]->getState() == STATE_SELECTED)
+			index = i;
+	}
+	
+	return index;
+}
+
 void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {	
 	button->check();
@@ -207,50 +230,123 @@ void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *
 
 void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	int index = SearchSelectedButton();
-	
-	if(index < 0)
-		return;
-	
-	folderList->Click(index);
-	folderButtons[index].folderButton->check();
+	if (rightSide)
+	{
+		int index = SearchSelectedRightSideButton();
+
+		if (index < 0)
+			return;
+
+		rightSideButtons[index]->clicked(rightSideButtons[index], controller, trigger);
+	}
+	else
+	{	
+		int index = SearchSelectedButton();
+		
+		if(index < 0)
+			return;
+		
+		folderList->Click(index);
+		folderButtons[index].folderButton->check();
+	}
 }
 
 void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	int index = SearchSelectedButton();
-	
-	if(index < 0 && trigger == &buttonUpTrigger)
-		return;
-	
-	if(trigger == &buttonUpTrigger && index > 0)
+	if (trigger == &buttonLeftTrigger || trigger == &buttonRightTrigger)
 	{
-		folderButtons[index].folderButton->clearState(STATE_SELECTED);
-		index--;
-		folderButtons[index].folderButton->setState(STATE_SELECTED);
-		
-		if(selectedItem == 0 && pageIndex > 0)
-			--pageIndex;
-		else if(pageIndex+selectedItem > 0)
-			--selectedItem;
-	}
-	else if(trigger == &buttonDownTrigger && index < buttonCount-1)
-	{
-		if(index >= 0)
-			folderButtons[index].folderButton->clearState(STATE_SELECTED);
-		index++;
-		folderButtons[index].folderButton->setState(STATE_SELECTED);
-		
-		if(pageIndex+selectedItem + 1 < buttonCount)
+		rightSide = !rightSide;
+		if (rightSide)
 		{
-			if(selectedItem == MAX_FOLDERS_PER_PAGE-1)
-				pageIndex++;
-			else
-				selectedItem++;
+			int lindex = SearchSelectedButton();
+			if (lindex >= 0)
+				folderButtons[lindex].folderButton->clearState(STATE_SELECTED);
+
+			int index = SearchSelectedRightSideButton();
+
+			if (index >= 0)
+				rightSideButtons[index]->clearState(STATE_SELECTED);
+			index = 0;
+			rightSideButtons[index]->setState(STATE_SELECTED);
+		}
+		else
+		{
+			int rindex = SearchSelectedRightSideButton();
+			if (rindex >= 0)
+				rightSideButtons[rindex]->clearState(STATE_SELECTED);
+
+			int index = SearchSelectedButton();
+			
+			if (index >= 0)
+				folderButtons[index].folderButton->clearState(STATE_SELECTED);
+			index = 0;
+			folderButtons[index].folderButton->setState(STATE_SELECTED);
+
+			pageIndex = 0;
+			selectedItem = 0;
+
+			scrollbar.SetSelected(selectedItem, pageIndex);
+		}
+		
+	}
+
+	if (rightSide)
+	{
+		int index = SearchSelectedRightSideButton();
+
+		if(index < 0 && trigger == &buttonUpTrigger)
+			return;
+
+		if(trigger == &buttonUpTrigger && index > 0)
+		{
+			rightSideButtons[index]->clearState(STATE_SELECTED);
+			index--;
+			rightSideButtons[index]->setState(STATE_SELECTED);
+		}
+		else if(trigger == &buttonDownTrigger && index < 2)
+		{
+			if(index >= 0)
+				rightSideButtons[index]->clearState(STATE_SELECTED);
+			index++;
+			rightSideButtons[index]->setState(STATE_SELECTED);
 		}
 	}
-	
-	scrollbar.SetSelected(selectedItem, pageIndex);
+	else
+	{
+		int index = SearchSelectedButton();
+		
+		if(index < 0 && trigger == &buttonUpTrigger)
+			return;
+		
+		if(trigger == &buttonUpTrigger && index > 0)
+		{
+			folderButtons[index].folderButton->clearState(STATE_SELECTED);
+			index--;
+			folderButtons[index].folderButton->setState(STATE_SELECTED);
+			
+			if(selectedItem == 0 && pageIndex > 0)
+				--pageIndex;
+			else if(pageIndex+selectedItem > 0)
+				--selectedItem;
+		}
+		else if(trigger == &buttonDownTrigger && index < buttonCount-1)
+		{
+			if(index >= 0)
+				folderButtons[index].folderButton->clearState(STATE_SELECTED);
+			index++;
+			folderButtons[index].folderButton->setState(STATE_SELECTED);
+			
+			if(pageIndex+selectedItem + 1 < buttonCount)
+			{
+				if(selectedItem == MAX_FOLDERS_PER_PAGE-1)
+					pageIndex++;
+				else
+					selectedItem++;
+			}
+		}
+		
+		scrollbar.SetSelected(selectedItem, pageIndex);
+	}
 }
 	
 void BrowserWindow::OnPlusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
