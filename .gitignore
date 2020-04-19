@@ -1,0 +1,12 @@
+# /
+/build
+/wup_installer_gx2.elf
+/wup_installer_gx2_dbg.elf
+
+# /src/common/
+/src/common/svnrev.c
+
+# /src/resources/
+/src/resources/filelist.h
+
+/.vscode
