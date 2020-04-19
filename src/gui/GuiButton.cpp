@@ -283,7 +283,7 @@ void GuiButton::update(GuiController * c)
 
                 clicked(this, c, trigger[i]);
             }
-            else if(isStateSet(STATE_CLICKED, c->chan) && (clickedTrigger == trigger[i]) && !isStateSet(STATE_HELD, c->chan) && !trigger[i]->held(c) && (!isClicked || trigger[i]->released(c)))
+            else if(isStateSet(STATE_CLICKED, c->chan) && (clickedTrigger == trigger[i]) && !isStateSet(STATE_HELD, c->chan) && !trigger[i]->held(c) && (/*!isClicked ||*/ trigger[i]->released(c)))
             {
                 clickedTrigger = NULL;
                 clearState(STATE_CLICKED, c->chan);
