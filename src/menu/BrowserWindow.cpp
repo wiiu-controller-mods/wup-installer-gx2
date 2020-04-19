@@ -26,6 +26,7 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     , buttonCheckedImageData(Resources::GetImageData("choiceCheckedRectangle.png"))
     , buttonHighlightedImageData(Resources::GetImageData("choiceSelectedRectangle.png"))
     , selectImageData(Resources::GetImageData("select_button.png"))
+	, selectSelectedImageData(Resources::GetImageData("select_buttonSelected.png"))
 	, selectImg(selectImageData)
 	, unselectImg(selectImageData)
 	, installImg(selectImageData)
@@ -125,7 +126,8 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     plusButton.setSoundClick(buttonClickSound);
     plusButton.setEffectGrow();
 	plusButton.setSelectable(true);
-	plusButton.setImageSelectOver(new GuiImage(buttonHighlightedImageData));
+	plusButtonSelectedImage = new GuiImage(selectSelectedImageData);
+	plusButton.setImageSelectOver(plusButtonSelectedImage);
     this->append(&plusButton);
 	rightSideButtons.push_back(&plusButton);
 
@@ -143,7 +145,8 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     minusButton.setSoundClick(buttonClickSound);
     minusButton.setEffectGrow();
 	minusButton.setSelectable(true);
-	minusButton.setImageSelectOver(new GuiImage(buttonHighlightedImageData));
+	minusButtonSelectedImage = new GuiImage(selectSelectedImageData);
+	minusButton.setImageSelectOver(minusButtonSelectedImage);
     this->append(&minusButton);
 	rightSideButtons.push_back(&minusButton);
 	
@@ -157,7 +160,8 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     installButton.setSoundClick(buttonClickSound);
     installButton.setEffectGrow();
 	installButton.setSelectable(true);
-	installButton.setImageSelectOver(new GuiImage(buttonHighlightedImageData));
+	installButtonSelectedImage = new GuiImage(selectSelectedImageData);
+	installButton.setImageSelectOver(installButtonSelectedImage);
     this->append(&installButton);
 	rightSideButtons.push_back(&installButton);
 }
@@ -176,10 +180,15 @@ BrowserWindow::~BrowserWindow()
 	
 	folderButtons.clear();
    
+	delete plusButtonSelectedImage;
+	delete minusButtonSelectedImage;
+	delete installButtonSelectedImage;
+
     Resources::RemoveImageData(buttonImageData);
     Resources::RemoveImageData(buttonCheckedImageData);
     Resources::RemoveImageData(buttonHighlightedImageData);
     Resources::RemoveImageData(selectImageData);
+	Resources::RemoveImageData(selectSelectedImageData);
     Resources::RemoveImageData(plusImageData);
     Resources::RemoveImageData(minusImageData);
     Resources::RemoveSound(buttonClickSound);

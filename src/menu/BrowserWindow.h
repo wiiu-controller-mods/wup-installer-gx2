@@ -51,10 +51,11 @@ private:
     GuiImageData *buttonHighlightedImageData;
 	
     GuiImageData *selectImageData;
+    GuiImageData *selectSelectedImageData;
     GuiImage selectImg;
     GuiImage unselectImg;
     GuiImage installImg;
-	
+
 	GuiImageData *plusImageData;
     GuiImageData *minusImageData;
     GuiImage plusImg;
@@ -82,6 +83,10 @@ private:
 	GuiButton minusButton;
 	GuiButton installButton;
 	
+    GuiImage* plusButtonSelectedImage;
+    GuiImage* minusButtonSelectedImage;
+    GuiImage* installButtonSelectedImage;
+
     int pageIndex;
 	int selectedItem;
 	int buttonCount;
