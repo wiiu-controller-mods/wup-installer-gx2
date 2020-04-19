@@ -172,12 +172,12 @@ void MainWindow::drawTv(CVideo *video)
 
 void MainWindow::SetupMainView()
 {
-	currentTvFrame = new GuiFrame(width, height);
-	currentTvFrame->setEffect(EFFECT_FADE, 10, 255);
-	currentTvFrame->setState(GuiElement::STATE_DISABLED);
-	currentTvFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
-	currentTvFrame->append(&splashImg);
-	appendTv(currentTvFrame);
+	// currentTvFrame = new GuiFrame(width, height);
+	// currentTvFrame->setEffect(EFFECT_FADE, 10, 255);
+	// currentTvFrame->setState(GuiElement::STATE_DISABLED);
+	// currentTvFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
+	// currentTvFrame->append(&splashImg);
+	// appendTv(currentTvFrame);
 	
 	currentDrcFrame = new GuiFrame(width, height);
 	currentDrcFrame->setEffect(EFFECT_FADE, 10, 255);
@@ -203,7 +203,7 @@ void MainWindow::SetupMainView()
 		currentDrcFrame->append(messageBox);
 	}
 	
-	appendDrc(currentDrcFrame);
+	append(currentDrcFrame);
 }
 
 void MainWindow::SetDrcHeader()
