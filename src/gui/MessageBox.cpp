@@ -159,7 +159,7 @@ void MessageBox::reload(std::string title, std::string message1, std::string mes
 		iconImage->setEffect(EFFECT_FADE, -10, 255);
 	for(int i = 0; i < buttonCount; i++)
 		messageButtons[i].messageButton->setEffect(EFFECT_FADE, -10, 255);
-	
+
 	titleText.effectFinished.connect(this, &MessageBox::OnReloadFadeOutFinished);
 }
 
@@ -203,6 +203,8 @@ void MessageBox::OnReloadFadeInFinished(GuiElement * element)
 {
 	titleText.effectFinished.disconnect(this);
 	this->resetState();
+	selectedButtonDPAD = 0;
+	UpdateButtons(NULL, NULL, NULL);
 }
 
 void MessageBox::setTitle(const std::string & title)
@@ -296,7 +298,7 @@ void MessageBox::setButtons(int typeButtons)
 	
 	if(typeButtons != BT_NOBUTTON)
 	{
-		selectedButtonDPAD = -1;
+		selectedButtonDPAD = 0;
 		
 		typeButtons > 1 ? buttonCount = 2 : buttonCount = 1;
 		messageButtons.resize(buttonCount);
@@ -354,6 +356,7 @@ void MessageBox::setButtons(int typeButtons)
 			messageButtons[i].messageButton->setTrigger(&touchTrigger);
 			this->append(messageButtons[i].messageButton);
 		}
+		UpdateButtons(NULL, NULL, NULL);
 	}
 }
 
