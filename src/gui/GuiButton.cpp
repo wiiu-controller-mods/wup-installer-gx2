@@ -214,9 +214,9 @@ void GuiButton::draw(CVideo *v)
 
 void GuiButton::update(GuiController * c)
 {
-	if(!c || isStateSet(STATE_DISABLED|STATE_HIDDEN|STATE_DISABLE_INPUT, c->chan))
+	if(!c || isStateSet(STATE_DISABLED, c->chan) || isStateSet(STATE_HIDDEN, c->chan))
 		return;
-	else if(parentElement && (parentElement->isStateSet(STATE_DISABLED|STATE_HIDDEN|STATE_DISABLE_INPUT, c->chan)))
+	else if(parentElement && (parentElement->isStateSet(STATE_DISABLED, c->chan) || parentElement->isStateSet(STATE_HIDDEN, c->chan)))
 		return;
 
     if(selectable)
@@ -282,7 +282,7 @@ void GuiButton::update(GuiController * c)
 
                 clicked(this, c, trigger[i]);
             }
-            else if(isStateSet(STATE_CLICKED, c->chan) && (clickedTrigger == trigger[i]) && !isStateSet(STATE_HELD, c->chan) && !trigger[i]->held(c) && (!isClicked || trigger[i]->released(c)))
+            else if(isStateSet(STATE_CLICKED, c->chan) && (clickedTrigger == trigger[i]) && !isStateSet(STATE_HELD, c->chan) && !trigger[i]->held(c) && (/*!isClicked ||*/ trigger[i]->released(c)))
             {
                 clickedTrigger = NULL;
                 clearState(STATE_CLICKED, c->chan);

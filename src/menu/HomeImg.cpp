@@ -81,7 +81,7 @@ void HomeImg::showHomeImg(void)
 	this->setEffect(EFFECT_FADE, 10, 255);
 	this->effectFinished.connect(this, &HomeImg::OnOpenEffectFinish);
 	
-	mainWindow->appendDrc(this);
+	mainWindow->append(this);
 }
 
 void HomeImg::hideHomeImg()

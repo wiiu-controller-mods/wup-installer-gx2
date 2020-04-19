@@ -26,6 +26,7 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     , buttonCheckedImageData(Resources::GetImageData("choiceCheckedRectangle.png"))
     , buttonHighlightedImageData(Resources::GetImageData("choiceSelectedRectangle.png"))
     , selectImageData(Resources::GetImageData("select_button.png"))
+	, selectSelectedImageData(Resources::GetImageData("select_buttonSelected.png"))
 	, selectImg(selectImageData)
 	, unselectImg(selectImageData)
 	, installImg(selectImageData)
@@ -37,11 +38,13 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 	, minusTxt("Unselect All", 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
 	, installTxt("Install", 42, glm::vec4(0.9f, 0.9f, 0.9f, 1.0f))
     , touchTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::VPAD_TOUCH)
-    , buttonATrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_A, true)
-    , buttonUpTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_UP | GuiTrigger::STICK_L_UP, true)
-    , buttonDownTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_DOWN | GuiTrigger::STICK_L_DOWN, true)
-    , plusTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_PLUS, true)
-    , minusTrigger(GuiTrigger::CHANNEL_1, GuiTrigger::BUTTON_MINUS, true)
+    , buttonATrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_A, true)
+    , buttonUpTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_UP | GuiTrigger::STICK_L_UP, true)
+    , buttonDownTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_DOWN | GuiTrigger::STICK_L_DOWN, true)
+	, buttonLeftTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_LEFT | GuiTrigger::STICK_L_LEFT, true)
+    , buttonRightTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_RIGHT | GuiTrigger::STICK_L_RIGHT, true)
+    , plusTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_PLUS, true)
+    , minusTrigger(GuiTrigger::CHANNEL_ALL, GuiTrigger::BUTTON_MINUS, true)
     , DPADButtons(w,h)
     , AButton(w,h)
 	, plusButton(selectImg.getWidth(), selectImg.getHeight())
@@ -100,13 +103,15 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
 	
 	DPADButtons.setTrigger(&buttonUpTrigger);
     DPADButtons.setTrigger(&buttonDownTrigger);
+	DPADButtons.setTrigger(&buttonLeftTrigger);
+    DPADButtons.setTrigger(&buttonRightTrigger);
     DPADButtons.clicked.connect(this, &BrowserWindow::OnDPADClick);
 	this->append(&DPADButtons);
     
 	AButton.setTrigger(&buttonATrigger);
     AButton.clicked.connect(this, &BrowserWindow::OnAButtonClick);
 	this->append(&AButton);
-	
+
 	plusImg.setAlignment(ALIGN_BOTTOM | ALIGN_RIGHT);
 	plusImg.setPosition(-10, 10);
     plusTxt.setMaxWidth(selectImg.getWidth()-5, GuiText::WRAP);
@@ -120,7 +125,11 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     plusButton.setTrigger(&touchTrigger);
     plusButton.setSoundClick(buttonClickSound);
     plusButton.setEffectGrow();
+	plusButton.setSelectable(true);
+	plusButtonSelectedImage = new GuiImage(selectSelectedImageData);
+	plusButton.setImageSelectOver(plusButtonSelectedImage);
     this->append(&plusButton);
+	rightSideButtons.push_back(&plusButton);
 
     minusImg.setAlignment(ALIGN_BOTTOM | ALIGN_RIGHT);
 	minusImg.setPosition(-10, 10);
@@ -135,7 +144,11 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     minusButton.setTrigger(&touchTrigger);
     minusButton.setSoundClick(buttonClickSound);
     minusButton.setEffectGrow();
+	minusButton.setSelectable(true);
+	minusButtonSelectedImage = new GuiImage(selectSelectedImageData);
+	minusButton.setImageSelectOver(minusButtonSelectedImage);
     this->append(&minusButton);
+	rightSideButtons.push_back(&minusButton);
 	
 	installTxt.setMaxWidth(unselectImg.getWidth()-5, GuiText::WRAP);
     installButton.setLabel(&installTxt);
@@ -146,7 +159,11 @@ BrowserWindow::BrowserWindow(int w, int h, CFolderList * list)
     installButton.setTrigger(&touchTrigger);
     installButton.setSoundClick(buttonClickSound);
     installButton.setEffectGrow();
+	installButton.setSelectable(true);
+	installButtonSelectedImage = new GuiImage(selectSelectedImageData);
+	installButton.setImageSelectOver(installButtonSelectedImage);
     this->append(&installButton);
+	rightSideButtons.push_back(&installButton);
 }
 
 BrowserWindow::~BrowserWindow()
@@ -163,10 +180,15 @@ BrowserWindow::~BrowserWindow()
 	
 	folderButtons.clear();
    
+	delete plusButtonSelectedImage;
+	delete minusButtonSelectedImage;
+	delete installButtonSelectedImage;
+
     Resources::RemoveImageData(buttonImageData);
     Resources::RemoveImageData(buttonCheckedImageData);
     Resources::RemoveImageData(buttonHighlightedImageData);
     Resources::RemoveImageData(selectImageData);
+	Resources::RemoveImageData(selectSelectedImageData);
     Resources::RemoveImageData(plusImageData);
     Resources::RemoveImageData(minusImageData);
     Resources::RemoveSound(buttonClickSound);
@@ -178,6 +200,18 @@ int BrowserWindow::SearchSelectedButton()
 	for(int i = 0; i < buttonCount && index < 0; i++)
 	{
 		if(folderButtons[i].folderButton->getState() == STATE_SELECTED)
+			index = i;
+	}
+	
+	return index;
+}
+
+int BrowserWindow::SearchSelectedRightSideButton()
+{
+	int index = -1;
+	for(int i = 0; i < 3 && index < 0; i++)
+	{
+		if(rightSideButtons[i]->getState() == STATE_SELECTED)
 			index = i;
 	}
 	
@@ -205,50 +239,123 @@ void BrowserWindow::OnFolderButtonClick(GuiButton *button, const GuiController *
 
 void BrowserWindow::OnAButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	int index = SearchSelectedButton();
-	
-	if(index < 0)
-		return;
-	
-	folderList->Click(index);
-	folderButtons[index].folderButton->check();
+	if (rightSide)
+	{
+		int index = SearchSelectedRightSideButton();
+
+		if (index < 0)
+			return;
+
+		rightSideButtons[index]->clicked(rightSideButtons[index], controller, trigger);
+	}
+	else
+	{	
+		int index = SearchSelectedButton();
+		
+		if(index < 0)
+			return;
+		
+		folderList->Click(index);
+		folderButtons[index].folderButton->check();
+	}
 }
 
 void BrowserWindow::OnDPADClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)
 {
-	int index = SearchSelectedButton();
-	
-	if(index < 0 && trigger == &buttonUpTrigger)
-		return;
-	
-	if(trigger == &buttonUpTrigger && index > 0)
+	if (trigger == &buttonLeftTrigger || trigger == &buttonRightTrigger)
 	{
-		folderButtons[index].folderButton->clearState(STATE_SELECTED);
-		index--;
-		folderButtons[index].folderButton->setState(STATE_SELECTED);
-		
-		if(selectedItem == 0 && pageIndex > 0)
-			--pageIndex;
-		else if(pageIndex+selectedItem > 0)
-			--selectedItem;
-	}
-	else if(trigger == &buttonDownTrigger && index < buttonCount-1)
-	{
-		if(index >= 0)
-			folderButtons[index].folderButton->clearState(STATE_SELECTED);
-		index++;
-		folderButtons[index].folderButton->setState(STATE_SELECTED);
-		
-		if(pageIndex+selectedItem + 1 < buttonCount)
+		rightSide = !rightSide;
+		if (rightSide)
 		{
-			if(selectedItem == MAX_FOLDERS_PER_PAGE-1)
-				pageIndex++;
-			else
-				selectedItem++;
+			int lindex = SearchSelectedButton();
+			if (lindex >= 0)
+				folderButtons[lindex].folderButton->clearState(STATE_SELECTED);
+
+			int index = SearchSelectedRightSideButton();
+
+			if (index >= 0)
+				rightSideButtons[index]->clearState(STATE_SELECTED);
+			index = 0;
+			rightSideButtons[index]->setState(STATE_SELECTED);
+		}
+		else
+		{
+			int rindex = SearchSelectedRightSideButton();
+			if (rindex >= 0)
+				rightSideButtons[rindex]->clearState(STATE_SELECTED);
+
+			int index = SearchSelectedButton();
+			
+			if (index >= 0)
+				folderButtons[index].folderButton->clearState(STATE_SELECTED);
+			index = 0;
+			folderButtons[index].folderButton->setState(STATE_SELECTED);
+
+			pageIndex = 0;
+			selectedItem = 0;
+
+			scrollbar.SetSelected(selectedItem, pageIndex);
+		}
+		
+	}
+
+	if (rightSide)
+	{
+		int index = SearchSelectedRightSideButton();
+
+		if(index < 0 && trigger == &buttonUpTrigger)
+			return;
+
+		if(trigger == &buttonUpTrigger && index > 0)
+		{
+			rightSideButtons[index]->clearState(STATE_SELECTED);
+			index--;
+			rightSideButtons[index]->setState(STATE_SELECTED);
+		}
+		else if(trigger == &buttonDownTrigger && index < 2)
+		{
+			if(index >= 0)
+				rightSideButtons[index]->clearState(STATE_SELECTED);
+			index++;
+			rightSideButtons[index]->setState(STATE_SELECTED);
 		}
 	}
-	
-	scrollbar.SetSelected(selectedItem, pageIndex);
+	else
+	{
+		int index = SearchSelectedButton();
+		
+		if(index < 0 && trigger == &buttonUpTrigger)
+			return;
+		
+		if(trigger == &buttonUpTrigger && index > 0)
+		{
+			folderButtons[index].folderButton->clearState(STATE_SELECTED);
+			index--;
+			folderButtons[index].folderButton->setState(STATE_SELECTED);
+			
+			if(selectedItem == 0 && pageIndex > 0)
+				--pageIndex;
+			else if(pageIndex+selectedItem > 0)
+				--selectedItem;
+		}
+		else if(trigger == &buttonDownTrigger && index < buttonCount-1)
+		{
+			if(index >= 0)
+				folderButtons[index].folderButton->clearState(STATE_SELECTED);
+			index++;
+			folderButtons[index].folderButton->setState(STATE_SELECTED);
+			
+			if(pageIndex+selectedItem + 1 < buttonCount)
+			{
+				if(selectedItem == MAX_FOLDERS_PER_PAGE-1)
+					pageIndex++;
+				else
+					selectedItem++;
+			}
+		}
+		
+		scrollbar.SetSelected(selectedItem, pageIndex);
+	}
 }
 	
 void BrowserWindow::OnPlusButtonClick(GuiButton *button, const GuiController *controller, GuiTrigger *trigger)

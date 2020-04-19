@@ -155,7 +155,6 @@ private:
 	GuiText versionText;
     GuiFrame headerFrame;
     
-    GuiFrame * currentTvFrame;
     GuiFrame * currentDrcFrame;
 
     GuiImageData *pointerImgData[4];

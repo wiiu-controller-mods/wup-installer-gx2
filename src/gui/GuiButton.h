@@ -40,11 +40,8 @@ class GuiButton : public GuiElement
 		//!Sets the button's image on over
 		//!\param i Pointer to GuiImage object
 		void setImageOver(GuiImage* i);
-		//!Sets the button's image on over
-		//!\param i Pointer to GuiImage object
+
 		void setIcon(GuiImage* i);
-		//!Sets the button's image on over
-		//!\param i Pointer to GuiImage object
 		void setIconOver(GuiImage* i);
 		//!Sets the button's image on over
 		//!\param i Pointer to GuiImage object
@@ -106,13 +103,13 @@ class GuiButton : public GuiElement
 		sigslot::signal3<GuiButton *, const GuiController *, GuiTrigger *> held;
 		sigslot::signal3<GuiButton *, const GuiController *, GuiTrigger *> released;
 	protected:
-        static const int iMaxGuiTriggers = 10;
+        static const int iMaxGuiTriggers = 7;
 
 		GuiImage * image; //!< Button image (default)
 		GuiImage * imageOver; //!< Button image for STATE_SELECTED
 		GuiImage * imageHold; //!< Button image for STATE_HELD
 		GuiImage * imageClick; //!< Button image for STATE_CLICKED
-		GuiImage * imageChecked; //!< Button image for STATE_CLICKED
+		GuiImage * imageChecked;
 		GuiImage * icon;
 		GuiImage * iconOver;
 		GuiImage * imageSelect;

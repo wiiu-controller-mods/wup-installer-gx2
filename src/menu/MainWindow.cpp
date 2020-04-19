@@ -18,7 +18,6 @@
 #include "Application.h"
 #include "utils/StringTools.h"
 #include "common/common.h"
-#include "common/svnrev.h"
 #include "gui/MessageBox.h"
 
 MainWindow::MainWindow(int w, int h)
@@ -171,13 +170,6 @@ void MainWindow::drawTv(CVideo *video)
 
 void MainWindow::SetupMainView()
 {
-	currentTvFrame = new GuiFrame(width, height);
-	currentTvFrame->setEffect(EFFECT_FADE, 10, 255);
-	currentTvFrame->setState(GuiElement::STATE_DISABLED);
-	currentTvFrame->effectFinished.connect(this, &MainWindow::OnOpenEffectFinish);
-	currentTvFrame->append(&splashImg);
-	appendTv(currentTvFrame);
-	
 	currentDrcFrame = new GuiFrame(width, height);
 	currentDrcFrame->setEffect(EFFECT_FADE, 10, 255);
 	currentDrcFrame->setState(GuiElement::STATE_DISABLED);
@@ -200,7 +192,7 @@ void MainWindow::SetupMainView()
 		currentDrcFrame->append(messageBox);
 	}
 	
-	appendDrc(currentDrcFrame);
+	append(currentDrcFrame);
 }
 
 void MainWindow::SetDrcHeader()
@@ -215,7 +207,7 @@ void MainWindow::SetDrcHeader()
 	versionText.setPosition(-15, -40);
 	versionText.setBlurGlowColor(5.0f, glm::vec4(0.0, 0.0, 0.0f, 1.0f));
 	versionText.setAlignment(ALIGN_RIGHT | ALIGN_TOP);
-	versionText.setTextf("%s (rev %s)",  WUP_GX2_VERSION, GetRev());
+	versionText.setTextf("%s (controller mod v1)", WUP_GX2_VERSION);
 	
 	headerFrame.setSize(titleImg.getWidth(), titleImg.getHeight());
 	headerFrame.setPosition(0, 310);

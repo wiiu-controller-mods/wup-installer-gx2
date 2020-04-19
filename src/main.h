@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-//! C wrapper for out C++ functions
+//! C wrapper for our C++ functions
 int Menu_Main(void);
 
 #ifdef __cplusplus
