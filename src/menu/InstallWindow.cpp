@@ -74,23 +74,15 @@ InstallWindow::InstallWindow(CFolderList * list)
 	drcFrame->effectFinished.connect(this, &InstallWindow::OnOpenEffectFinish);
 	drcFrame->append(messageBox);
 	
-	progressWindow = new ProgressWindow("title");
-	tvFrame = new GuiFrame(0, 0);
-	tvFrame->setPosition(0, -250);
-	
-	mainWindow->appendDrc(drcFrame);
-	mainWindow->appendTv(tvFrame);
+	mainWindow->append(drcFrame);
 }
 
 InstallWindow::~InstallWindow()
 {
 	drcFrame->remove(messageBox);
 	mainWindow->remove(drcFrame);
-	mainWindow->remove(tvFrame);
 	delete drcFrame;
-	delete tvFrame;
 	delete messageBox;
-	delete progressWindow;
 }
 
 void InstallWindow::OnValidInstallClick(GuiElement * element, int val)
@@ -124,31 +116,6 @@ void InstallWindow::OnDestinationChoice(GuiElement * element, int choice)
 	}
 	
 	startInstalling();
-}
-
-void InstallWindow::showTvProgress()
-{
-	progressWindow->setEffect(EFFECT_FADE, 10, 255);
-	progressWindow->effectFinished.connect(this, &InstallWindow::OnOpenEffectFinish);
-	
-	tvFrame->append(progressWindow);
-}
-
-void InstallWindow::hideTvProgress()
-{
-	progressWindow->setEffect(EFFECT_FADE, -10, 255);
-	progressWindow->effectFinished.connect(this, &InstallWindow::OnCloseTvProgressEffectFinish);
-}
-
-void InstallWindow::setTvProgressTitle(std::string title)
-{
-	progressWindow->setTitle(title);
-}
-
-void InstallWindow::OnCloseTvProgressEffectFinish(GuiElement * element)
-{
-	progressWindow->effectFinished.disconnect(this);
-	tvFrame->remove(progressWindow);
 }
 
 void InstallWindow::executeThread()
@@ -206,9 +173,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 	std::string gameName = folderList->GetName(index);
 	
 	messageBox->reload(title, gameName, "", MessageBox::BT_NOBUTTON, MessageBox::IT_ICONINFORMATION, true, "0.0 %");
-	
-	setTvProgressTitle(fmt("Installing %s", gameName.c_str()));
-	showTvProgress();
 	
 	/////////////////////////////
 	// install process
@@ -331,9 +295,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 						
 						messageBox->setProgress(percent);
 						messageBox->setProgressBarInfo(message);
-						
-						progressWindow->setProgress(percent);
-						progressWindow->setInfo(message);
 					}
 					
 					usleep(50000);
@@ -381,8 +342,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 			OSFreeToSystem(mcpInstallInfo);
 	}
 	/////////////////////////////
-	
-	hideTvProgress();
 	
 	if(result >= 0)
 	{
