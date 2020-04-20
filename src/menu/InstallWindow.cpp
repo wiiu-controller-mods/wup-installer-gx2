@@ -23,6 +23,7 @@
 #include "system/power.h"
 #include <coreinit/mcp.h>
 #include <coreinit/memory.h>
+#include <coreinit/ios.h>
 
 #define MCP_COMMAND_INSTALL_ASYNC   0x81
 #define MAX_INSTALL_PATH_LENGTH     0x27F
@@ -30,7 +31,7 @@
 static int installCompleted = 0;
 static u32 installError = 0;
 
-static int IosInstallCallback(unsigned int errorCode, unsigned int * priv_data)
+static void* IosInstallCallback(IOSError errorCode, void * priv_data)
 {
 	installError = errorCode;
 	installCompleted = 1;
@@ -184,7 +185,7 @@ void InstallWindow::InstallProcess(int pos, int total)
         char installPath[256];
 		unsigned int * mcpInstallInfo = (unsigned int *)OSAllocFromSystem(0x24, 0x40);
 		char * mcpInstallPath = (char *)OSAllocFromSystem(MAX_INSTALL_PATH_LENGTH, 0x40);
-		unsigned int * mcpPathInfoVector = (unsigned int *)OSAllocFromSystem(0x0C, 0x40);
+		IOSVec * mcpPathInfoVector = (IOSVec *)OSAllocFromSystem(0x0C, 0x40);
 		
 		do
 		{
@@ -256,10 +257,10 @@ void InstallWindow::InstallProcess(int pos, int total)
 				snprintf(mcpInstallPath, MAX_INSTALL_PATH_LENGTH, installFolder.c_str());
 				memset(mcpPathInfoVector, 0, 0x0C);
 				
-				mcpPathInfoVector[0] = (unsigned int)mcpInstallPath;
-				mcpPathInfoVector[1] = (unsigned int)MAX_INSTALL_PATH_LENGTH;
+				mcpPathInfoVector->vaddr = mcpInstallPath;
+				mcpPathInfoVector->len = (unsigned int)MAX_INSTALL_PATH_LENGTH;
 				
-				res = IOS_IoctlvAsync(mcpHandle, MCP_COMMAND_INSTALL_ASYNC, 1, 0, mcpPathInfoVector, (void*)IosInstallCallback, mcpInstallInfo);
+				res = IOS_IoctlvAsync(mcpHandle, MCP_COMMAND_INSTALL_ASYNC, 1, 0, mcpPathInfoVector, (IOSAsyncCallbackFn)IosInstallCallback, mcpInstallInfo);
 				if(res != 0)
 				{
 					messageBox->reload("Install failed", gameName, fmt("MCP_InstallTitleAsync 0x%08X", MCP_GetLastRawError()), MessageBox::BT_OK, MessageBox::IT_ICONERROR);

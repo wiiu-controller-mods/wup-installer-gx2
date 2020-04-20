@@ -2,38 +2,9 @@
 #include "common/types.h"
 #include "exception_handler.h"
 
-#define OS_EXCEPTION_MODE_GLOBAL_ALL_CORES      4
-
 #define OS_EXCEPTION_DSI                        2
 #define OS_EXCEPTION_ISI                        3
 #define OS_EXCEPTION_PROGRAM                    6
-
-/* Exceptions */
-typedef struct OSContext
-{
-  /* OSContext identifier */
-  uint32_t tag1;
-  uint32_t tag2;
-
-  /* GPRs */
-  uint32_t gpr[32];
-
-  /* Special registers */
-  uint32_t cr;
-  uint32_t lr;
-  uint32_t ctr;
-  uint32_t xer;
-
-  /* Initial PC and MSR */
-  uint32_t srr0;
-  uint32_t srr1;
-
-  /* Only valid during DSI exception */
-  uint32_t exception_specific0;
-  uint32_t exception_specific1;
-
-  /* There is actually a lot more here but we don't need the rest*/
-} OSContext;
 
 #include <coreinit/exception.h>
 #include <coreinit/debug.h>
@@ -98,7 +69,7 @@ static unsigned char exception_cb(OSContext * context, unsigned char exception_t
 	pos += sprintf(buf + pos, exception_print_formats[9], context->lr, context->srr0, context->srr1);
 
 	//if(exception_type == OS_EXCEPTION_DSI) {
-        pos += sprintf(buf + pos, exception_print_formats[10], context->exception_specific1, context->exception_specific0); // this freezes
+        pos += sprintf(buf + pos, exception_print_formats[10], context->dar, context->dsisr); // this freezes
 	//}
 
     void *pc = (void*)context->srr0;

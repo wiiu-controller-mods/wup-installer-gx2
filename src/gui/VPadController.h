@@ -38,7 +38,8 @@ public:
         lastData = data;
 
         VPADReadError vpadError = VPAD_READ_NO_SAMPLES;
-        VPADRead(0, &vpad, 1, &vpadError);
+        VPADChan channel = VPAD_CHAN_0;
+        VPADRead(channel, &vpad, 1, &vpadError);
 
         if(vpadError == VPAD_READ_SUCCESS)
         {

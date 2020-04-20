@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#include "dynamic_libs/os_functions.h"
+#include <coreinit/energysaver.h>
 #include "utils/logger.h"
 #include "power.h"
 
 bool isEnabledAutoPowerDown()
 {
 	bool enabled = false;
-	int apd_enabled = 0;
+	unsigned int apd_enabled = 0;
 	
 	IMIsAPDEnabled(&apd_enabled);
 	

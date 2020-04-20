@@ -53,7 +53,7 @@ void InitOSFunctionPointers(void);
 //! MCP functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 extern int (*MCP_GetLastRawError)(void);
-extern int (*IOS_IoctlvAsync)(unsigned int fd, unsigned int command, int cnt_in, int cnt_out, void *ioctlv, void *ipc_callback, void *usrdata);
+//extern int (*IOS_IoctlvAsync)(unsigned int fd, unsigned int command, int cnt_in, int cnt_out, void *ioctlv, void *ipc_callback, void *usrdata);
 
 typedef unsigned char (*exception_callback)(void * interruptedContext);
 extern void (* OSSetExceptionCallback)(u8 exceptionType, exception_callback newCallback);
@@ -61,14 +61,14 @@ extern void (* OSSetExceptionCallback)(u8 exceptionType, exception_callback newC
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //! Energy Saver functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-extern int (*IMEnableAPD)(void);
-extern int (*IMDisableAPD)(void);
-extern int (*IMIsAPDEnabled)(int * result);
+// extern int (*IMEnableAPD)(void);
+// extern int (*IMDisableAPD)(void);
+// extern int (*IMIsAPDEnabled)(int * result);
 
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //! Home Menu functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-extern bool (*OSEnableHomeButtonMenu)(bool enable);
+//extern bool (*OSEnableHomeButtonMenu)(bool enable);
 
 #ifdef __cplusplus
 }

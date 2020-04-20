@@ -28,42 +28,42 @@
 //! MCP functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 EXPORT_DECL(int, MCP_GetLastRawError, void);
-EXPORT_DECL(int, IOS_IoctlvAsync, unsigned int fd, unsigned int command, int cnt_in, int cnt_out, void *ioctlv, void *ipc_callback, void *usrdata);
+//EXPORT_DECL(int, IOS_IoctlvAsync, unsigned int fd, unsigned int command, int cnt_in, int cnt_out, void *ioctlv, void *ipc_callback, void *usrdata);
 
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //! Energy Saver functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-EXPORT_DECL(int, IMEnableAPD, void);
-EXPORT_DECL(int, IMDisableAPD, void);
-EXPORT_DECL(int, IMIsAPDEnabled, int * result);
+//EXPORT_DECL(int, IMEnableAPD, void);
+//EXPORT_DECL(int, IMDisableAPD, void);
+//EXPORT_DECL(int, IMIsAPDEnabled, int * result);
 
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //! Home Menu functions
 //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-EXPORT_DECL(bool, OSEnableHomeButtonMenu, bool enable);
+//EXPORT_DECL(bool, OSEnableHomeButtonMenu, bool enable);
 
 void InitOSFunctionPointers(void)
 {
     unsigned int *funcPointer = 0;
-    OSDynLoadModule coreinit_handle;
+    OSDynLoad_Module coreinit_handle;
     OSDynLoad_Acquire("coreinit.rpl", &coreinit_handle);
 
     //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //! MCP functions
     //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     OS_FIND_EXPORT(coreinit_handle, MCP_GetLastRawError);
-    OS_FIND_EXPORT(coreinit_handle, IOS_IoctlvAsync);
+    // OS_FIND_EXPORT(coreinit_handle, IOS_IoctlvAsync);
     
 	//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //! Energy Saver functions
     //!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    OS_FIND_EXPORT(coreinit_handle, IMEnableAPD);
-    OS_FIND_EXPORT(coreinit_handle, IMDisableAPD);
-    OS_FIND_EXPORT(coreinit_handle, IMIsAPDEnabled);
+    // OS_FIND_EXPORT(coreinit_handle, IMEnableAPD);
+    // OS_FIND_EXPORT(coreinit_handle, IMDisableAPD);
+    // OS_FIND_EXPORT(coreinit_handle, IMIsAPDEnabled);
 	
 	//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	//! Home Menu functions
 	//!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	OS_FIND_EXPORT(coreinit_handle, OSEnableHomeButtonMenu);
+	//OS_FIND_EXPORT(coreinit_handle, OSEnableHomeButtonMenu);
 }
 

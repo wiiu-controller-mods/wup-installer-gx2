@@ -34,7 +34,7 @@ EXPORT_DECL(s32, KPADRead, s32 chan, void * data, u32 size);
 void InitPadScoreFunctionPointers(void)
 {
     unsigned int *funcPointer = 0;
-    OSDynLoadModule padscore_handle;
+    OSDynLoad_Module padscore_handle;
     OSDynLoad_Acquire("padscore.rpl", &padscore_handle);
 
     OS_FIND_EXPORT(padscore_handle, KPADInit);

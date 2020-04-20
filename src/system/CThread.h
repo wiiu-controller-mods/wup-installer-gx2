@@ -20,6 +20,7 @@
 #include <malloc.h>
 #include <unistd.h>
 #include <coreinit/thread.h>
+#include "common/types.h"
 
 class CThread
 {

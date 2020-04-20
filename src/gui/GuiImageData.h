@@ -22,6 +22,7 @@
 #include <gx2/texture.h>
 #include <gx2/sampler.h>
 #include "system/AsyncDeleter.h"
+#include "common/types.h"
 
 class GuiImageData : public AsyncDeleter::Element
 {

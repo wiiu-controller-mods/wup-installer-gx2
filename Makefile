@@ -1,41 +1,24 @@
-#---------------------------------------------------------------------------------
-# Clear the implicit built in rules
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 .SUFFIXES:
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(DEVKITPPC)),)
-$(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
-endif
+#-------------------------------------------------------------------------------
+
 ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
 endif
-ifeq ($(strip $(WUT_ROOT)),)
-$(error "Please ensure WUT_ROOT is in your environment.")
-endif
-export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
-export LIBOGC_INC	:=	$(DEVKITPRO)/libogc/include
-export LIBOGC_LIB	:=	$(DEVKITPRO)/libogc/lib/wii
-export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
 
-PREFIX	:=	powerpc-eabi-
+TOPDIR ?= $(CURDIR)
 
-export AS	:=	$(PREFIX)as
-export CC	:=	$(PREFIX)gcc
-export CXX	:=	$(PREFIX)g++
-export AR	:=	$(PREFIX)ar
-export OBJCOPY	:=	$(PREFIX)objcopy
+include $(DEVKITPRO)/wut/share/wut_rules
 
-export ELF2RPL	:= $(WUT_ROOT)/bin/elf2rpl
-
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
 # SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing extra header files
-#---------------------------------------------------------------------------------
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+#-------------------------------------------------------------------------------
 TARGET		:=	wup_installer_gx2
 BUILD		:=	build
-BUILD_DBG	:=	$(TARGET)_dbg
 SOURCES		:=	src \
 				src/common \
 				src/dynamic_libs \
@@ -52,49 +35,43 @@ DATA		:=	data \
 				data/images \
 				data/fonts \
 				data/sounds
+INCLUDES	:=	src
 
-INCLUDES	:=  src
-
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # options for code generation
-#---------------------------------------------------------------------------------
-CFLAGS	:=  -std=gnu11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
-		    -O3 -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing -D_GNU_SOURCE $(INCLUDE)
-CXXFLAGS := -std=gnu++11 -mrvl -mcpu=750 -meabi -mhard-float -ffast-math \
-		    -O3 -Wall -Wextra -Wno-unused-parameter -Wno-strict-aliasing -D_GNU_SOURCE $(INCLUDE)
-ASFLAGS	:= -mregnames
-LDFLAGS	:= -nostartfiles -T $(WUT_ROOT)/rules/rpl.ld -pie -fPIE -z common-page-size=64 -z max-page-size=64 -lcrt \
-			-Wl,-wrap,malloc,-wrap,free,-wrap,memalign,-wrap,calloc,-wrap,realloc,-wrap,malloc_usable_size \
-			-Wl,-wrap,_malloc_r,-wrap,_free_r,-wrap,_realloc_r,-wrap,_calloc_r,-wrap,_memalign_r,-wrap,_malloc_usable_size_r \
-			-Wl,-wrap,valloc,-wrap,_valloc_r,-wrap,_pvalloc_r,-wrap,__eabi -Wl,--gc-sections
+#-------------------------------------------------------------------------------
+CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
+			$(MACHDEP)
 
-#---------------------------------------------------------------------------------
-Q := @
-MAKEFLAGS += --no-print-directory
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project
-#---------------------------------------------------------------------------------
-LIBS	:= -lcrt -lcoreinit -lproc_ui -lnsysnet -lsndcore2 -lvpad -lgx2 -lsysapp -lgd -lpng -ljpeg -lz -lfreetype -lmad -lvorbisidec
+CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -D_GNU_SOURCE
 
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:=	$(CURDIR)	\
-			$(DEVKITPPC)/  \
-			$(DEVKITPPC)/lib/gcc/powerpc-eabi/4.8.2 \
-			$(WUT_ROOT)/lib
+CXXFLAGS	:= $(CFLAGS)
 
-#---------------------------------------------------------------------------------
+ASFLAGS	:=	-g $(ARCH)
+LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
+
+LIBS	:= -lwut -lgd -lpng -ljpeg -lz -lfreetype -lbz2 -lmad -lvorbisidec -logg
+
+#-------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level
+# containing include and lib
+#-------------------------------------------------------------------------------
+LIBDIRS	:= $(PORTLIBS) $(WUT_ROOT)
+
+
+#-------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
 # rules for different file extensions
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
-#---------------------------------------------------------------------------------
-export PROJECTDIR := $(CURDIR)
-export OUTPUT	:=	$(CURDIR)/$(TARGETDIR)/$(TARGET)
+#-------------------------------------------------------------------------------
+
+export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export TOPDIR	:=	$(CURDIR)
+
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 #---------------------------------------------------------------------------------
@@ -111,49 +88,49 @@ PNGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.png)))
 OGGFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.ogg)))
 MP3FILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.mp3)))
 
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 ifeq ($(strip $(CPPFILES)),)
+#-------------------------------------------------------------------------------
 	export LD	:=	$(CC)
+#-------------------------------------------------------------------------------
 else
+#-------------------------------------------------------------------------------
 	export LD	:=	$(CXX)
+#-------------------------------------------------------------------------------
 endif
+#-------------------------------------------------------------------------------
 
-export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
+export OFILES 	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 					$(sFILES:.s=.o) $(SFILES:.S=.o) \
 					$(PNGFILES:.png=.png.o) $(TTFFILES:.ttf=.ttf.o) \
 					$(MP3FILES:.mp3=.mp3.o) $(OGGFILES:.ogg=.ogg.o) \
 					$(addsuffix .o,$(BINFILES))
+export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
-#---------------------------------------------------------------------------------
-# build a list of include paths
-#---------------------------------------------------------------------------------
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					-I$(CURDIR)/$(BUILD) -I$(WUT_ROOT)/include \
-					-I$(PORTLIBS)/include -I$(PORTLIBS)/include/freetype2
+					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+					-I$(CURDIR)/$(BUILD) -I$(PORTLIBS)/include \
+					-I$(PORTLIBS_PATH)/ppc/include/freetype2
 
-#---------------------------------------------------------------------------------
-# build a list of library paths
-#---------------------------------------------------------------------------------
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)) \
-					-L$(LIBOGC_LIB) -L$(PORTLIBS)/lib
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
-.PHONY: $(BUILD) clean install
+.PHONY: $(BUILD) clean all
 
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+all: $(BUILD)
+
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-#---------------------------------------------------------------------------------
-clean: clean_channel
+#-------------------------------------------------------------------------------
+clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin $(BUILD_DBG).elf $(OUTPUT).rpx \
-			$(CURDIR)/src/common/svnrev.c $(CURDIR)/src/resources/filelist.h
+	@rm -fr $(BUILD) $(TARGET).rpx $(TARGET).elf
 
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 run:
 	wiiload $(OUTPUT).rpx
 
@@ -178,47 +155,23 @@ else
 
 DEPENDS	:=	$(OFILES:.o=.d)
 
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # main targets
-#---------------------------------------------------------------------------------
-$(OUTPUT).rpx:	$(OUTPUT).elf
-$(OUTPUT).elf:  $(OFILES)
+#-------------------------------------------------------------------------------
+all	:	$(OUTPUT).rpx
 
-#---------------------------------------------------------------------------------
-# This rule links in binary data with the .jpg extension
-#---------------------------------------------------------------------------------
-%.elf: $(OFILES)
-	@echo "linking ... $(TARGET).elf"
-	$(Q)$(LD) $^ $(LDFLAGS) -o $@ $(LIBPATHS) $(LIBS)
+$(OUTPUT).rpx	:	$(OUTPUT).elf
+$(OUTPUT).elf	:	$(OFILES)
 
-#---------------------------------------------------------------------------------
-%.rpx: %.elf
-#---------------------------------------------------------------------------------
-	@echo "[RPX] $(notdir $@)"
-	@$(ELF2RPL) $^ $@
+$(OFILES_SRC)	: $(HFILES_BIN)
 
-#---------------------------------------------------------------------------------
-%.a:
-#---------------------------------------------------------------------------------
-	@echo $(notdir $@)
-	@rm -f $@
-	@$(AR) -rc $@ $^
-
-#---------------------------------------------------------------------------------
-%.o: %.cpp
+#-------------------------------------------------------------------------------
+# you need a rule like this for each extension you use as binary data
+#-------------------------------------------------------------------------------
+%.bin.o	%_bin.h :	%.bin
+#-------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
-
-#---------------------------------------------------------------------------------
-%.o: %.c
-	@echo $(notdir $<)
-	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d $(CFLAGS) -c $< -o $@ $(ERROR_FILTER)
-
-#---------------------------------------------------------------------------------
-%.o: %.S
-	@echo $(notdir $<)
-	@$(CC) -MMD -MP -MF $(DEPSDIR)/$*.d -x assembler-with-cpp $(ASFLAGS) -c $< -o $@ $(ERROR_FILTER)
-
+	@$(bin2o)
 #---------------------------------------------------------------------------------
 %.png.o : %.png
 	@echo $(notdir $<)
@@ -256,6 +209,6 @@ $(OUTPUT).elf:  $(OFILES)
 
 -include $(DEPENDS)
 
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 endif
-#---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
