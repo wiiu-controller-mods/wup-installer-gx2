@@ -2,6 +2,7 @@
 /build
 /wup_installer_gx2.elf
 /wup_installer_gx2_dbg.elf
+*.rpx
 
 # /src/common/
 /src/common/svnrev.c
@@ -10,3 +11,5 @@
 /src/resources/filelist.h
 
 /.vscode
+/install
+/NUSPacker.jar
