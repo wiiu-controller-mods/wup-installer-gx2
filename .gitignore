@@ -11,5 +11,7 @@
 /src/resources/filelist.h
 
 /.vscode
-/install
+/wupgx2_install_channel
 /NUSPacker.jar
+
+/encryptKeyWith
