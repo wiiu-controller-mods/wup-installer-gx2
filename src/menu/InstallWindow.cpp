@@ -284,9 +284,6 @@ void InstallWindow::InstallProcess(int pos, int total)
 						
 						messageBox->setProgress(percent);
 						messageBox->setProgressBarInfo(message);
-						
-						progressWindow->setProgress(percent);
-						progressWindow->setInfo(message);
 					}
 					
 					usleep(50000);
